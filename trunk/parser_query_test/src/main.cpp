@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "../../parser_query/includes/QueryParser.h"
+#include "QueryParser.h"
 
 using namespace std;
 
