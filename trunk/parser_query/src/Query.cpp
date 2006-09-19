@@ -1,4 +1,4 @@
-#include "includes/Query.h"
+#include "Query.h"
 
 Query::Query( string word, bool included, bool excluded, int weight )
 {
