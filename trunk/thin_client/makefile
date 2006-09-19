@@ -2,34 +2,26 @@
 
 -include ../makefile.def
 
-OUTPUT_FILE := libparser_query.a
-
-CPP_SRCS += \
-$(SRC)/Query.cpp \
-$(SRC)/QueryParser.cpp
-
-DEPS += \
-${addprefix ./, \
-$(OUTPUT)Query.d \
-$(OUTPUT)QueryParser.d \
-}
-
-OBJS += \
-./$(OUTPUT)Query.o \
-./$(OUTPUT)QueryParser.o
+OUTPUT_FILE := thin_client.out
+CPP_SRCS    += $(SRC)main.cpp
+DEPS 	    += ${ addprefix ./, $(OUTPUT)main.d }
+OBJS 	    += $(OUTPUT)main.o
+LIBS 	    := -lparser_query
+INC  	    := -I$(LIB)
 
 all: build
 
 build: $(OUTPUT_FILE)
 
-$(OUTPUT_FILE): $(OBJS) $(USER_OBJS)
+$(OUTPUT_FILE): $(LIB)/libparser_query.a $(USER_OBJS) $(OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC Archiver'
-	@echo ar -r $(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(USER_OBJS) $(LIBS)
-	@ar -r $(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC C++ Linker'
+	@echo g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(USER_OBJS) $(LIBS)
+	@g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
+	$(COPY) $(SRC)result.template $(OUTPUT)
 	@echo ' '
-
+	
 $(OUTPUT)%.o: $(SRC)%.cpp
 	@echo 'Building file: $<'
 	@echo 'Making dir: ' $(MKDIR) $(OUTPUT)
@@ -42,9 +34,20 @@ $(OUTPUT)%.o: $(SRC)%.cpp
 	@echo 'Finished building: $<'
 	@echo ' '
 
+$(LIB)/libparser_query.a : depends
+
+depends:
+	@echo 'Depends...'
+	@echo 'Making dir: ' $(MKDIR) $(LIB)
+	$(MKDIR) $(LIB)
+
+	$(COPY) $(STAGE)libparser_query.a $(LIB)
+	$(COPY) $(STAGE)Query.h $(LIB)
+	$(COPY) $(STAGE)QueryParser.h $(LIB)
+
 clean:
 	@echo 'Cleaning...'
-	@if [ -d $(OUTPUT) ]; then $(RM) $(OUTPUT)*.*; $(RMDIR) $(OUTPUT); fi
+	@if [ -d $(OUTPUT) ]; then $(RM) $(OUTPUT).; $(RMDIR) $(OUTPUT); fi
 	@echo ' '
 
 distclean: clean
@@ -57,4 +60,4 @@ rebuild : clean build
 
 stage: build
 	$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE)
-	$(COPY) $(SRC)*.h $(STAGE)
+	$(COPY) $(OUTPUT)result.template $(STAGE)
