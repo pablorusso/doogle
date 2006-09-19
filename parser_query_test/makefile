@@ -2,7 +2,7 @@
 
 -include ../makefile.def
 
-OUTPUT_FILE := parser_query_test
+OUTPUT_FILE := parser_query_test.out
 CPP_SRCS    += $(SRC)main.cpp
 DEPS 	    += ${ addprefix ./, $(OUTPUT)main.d }
 OBJS 	    += $(OUTPUT)main.o
@@ -40,16 +40,9 @@ depends:
 	@echo 'Making dir: ' $(MKDIR) $(LIB)
 	$(MKDIR) $(LIB)
 
-	@if [ $$stage ]; then \
-		$(COPY) $$stage/libparser_query.a $(LIB); \
-		$(COPY) $$stage/Query.h $(LIB); \
-		$(COPY) $$stage/QueryParser.h $(LIB); \
-	else \
-		read -p "Ingrese el stage: " stage; \
-		$(COPY) $$stage/libparser_query.a $(LIB); \
-				$(COPY) $$stage/Query.h $(LIB); \
-		$(COPY) $$stage/QueryParser.h $(LIB); \
-	fi
+	$(COPY) $(STAGE)libparser_query.a $(LIB)
+	$(COPY) $(STAGE)Query.h $(LIB)
+	$(COPY) $(STAGE)QueryParser.h $(LIB)
 
 clean:
 	@echo 'Cleaning...'
@@ -58,18 +51,11 @@ clean:
 
 distclean: clean
 	@echo 'Dist Cleaning...'
-	@if [ -d $(DOC) ]; then $(RM) $(DOC).; $(RMDIR) $(DOC); fi
-	@if [ -d $(LIB) ]; then $(RM) $(LIB).; $(RMDIR) $(LIB); fi
+	@if [ -d $(DOC) ]; then $(RM) $(DOC)*.*; $(RMDIR) $(DOC); fi
+	@if [ -d $(LIB) ]; then $(RM) $(LIB)*.*; $(RMDIR) $(LIB); fi
 	@echo ' '
 
 rebuild : clean build
 
 stage: build
-	@if [ $$stage ]; then \
-		echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $$stage; \
-		$(COPY) $(OUTPUT)$(OUTPUT_FILE) $$stage; \
-	else \
-		read -p "Ingrese el stage: " stage; \
-		echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $$stage; \
-		$(COPY) $(OUTPUT)$(OUTPUT_FILE) $$stage; \
-	fi
+	$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE)

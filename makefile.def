@@ -4,6 +4,7 @@ SRC    = src/
 LIB    = lib/
 DOC    = doc/
 OUTPUT = bin/
+STAGE  = ../../stage/
 
 RM     = rm -rf
 RMDIR  = rmdir
