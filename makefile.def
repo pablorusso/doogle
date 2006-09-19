@@ -1,0 +1,11 @@
+SHELL  = /bin/bash
+
+SRC    = src/
+LIB    = lib/
+DOC    = doc/
+OUTPUT = bin/
+
+RM     = rm -rf
+RMDIR  = rmdir
+MKDIR  = mkdir -p
+COPY   = cp
