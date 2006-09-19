@@ -1,4 +1,4 @@
-#include "includes/QueryParser.h"
+#include "QueryParser.h"
 
 QueryParser::QueryParser()
 {
