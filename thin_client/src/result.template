@@ -52,7 +52,7 @@
 		<tr>
 			<form name=gs method=POST action="thin_client.out">
 				<td valign=top>
-					<a href="http://localhost/datos/">
+					<a href="http://localhost/doogle/">
 						<img src="../images/logo_sm.gif" width=150 height=55 alt="Vaya a la página principal de Doogle" border=0 vspace=12>
 					</a>
 				</td>
@@ -125,7 +125,7 @@
 		<hr class=z>
 			<table border=0 cellpadding=2 cellspacing=0 width=100%>
 			<tr><td align=center>
-				<font size=-1><a href="/datos/">Pagina principal de Doogle</a></font>
+				<font size=-1><a href="/doogle/">Pagina principal de Doogle</a></font>
 			</td></tr>
 			</table>
 			<br>
