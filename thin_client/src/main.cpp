@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "QueryParser.h"
 
 using namespace std;
 
@@ -88,11 +89,13 @@ int main(int argc, char* argv[])
 			word = buff.substr( pos, pos2 - pos );
 	}
 
-	// if ( word != "" )
-	// {
-	//    llamar al parser
-	//    llamar a buscar
-	// }
+	vector<Query *> query;
+	if ( word != "" )
+	{
+		QueryParser::Parse( word, query );
+		
+		// llamar al buscador
+	}
 
 	ifstream in;
 	in.open("result.template");

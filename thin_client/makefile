@@ -27,7 +27,7 @@ $(OUTPUT)%.o: $(SRC)%.cpp
 	@echo 'Making dir: ' $(MKDIR) $(OUTPUT)
 	$(MKDIR) $(OUTPUT)
 	@echo 'Invoking: GCC C++ Compiler'
-	@echo g++ -O0 -g3 -Wall -c -fmessage-length=0 -o$@ $<
+	@echo g++ $(INC) -O0 -g3 -Wall -c -fmessage-length=0 -o$@ $<
 	@g++ $(INC) -O0 -g3 -Wall -c -fmessage-length=0 -o$@ $< && \
 	echo -n $(@:%.o=%.d) $(dir $@) > $(@:%.o=%.d) && \
 	g++ -MM -MG -P -w $(INC) -O0 -g3 -Wall -c -fmessage-length=0  $< >> $(@:%.o=%.d)
