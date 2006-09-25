@@ -46,6 +46,7 @@ depends:
 	$(COPY) $(STAGE)Query.h $(LIB)
 	$(COPY) $(STAGE)QueryParser.h $(LIB)
 	$(COPY) $(STAGE)InvalidTokenException.h $(LIB)
+	$(COPY) $(STAGE)SearchResultWriter.h $(LIB)
 
 clean:
 	@echo 'Cleaning...'
