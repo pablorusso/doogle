@@ -5,17 +5,21 @@
 OUTPUT_FILE := libparser_query.a
 
 CPP_SRCS += \
-$(SRC)/Query.cpp \
-$(SRC)/QueryParser.cpp
+$(SRC)Query.cpp \
+$(SRC)InvalidTokenException.cpp \
+$(SRC)QueryParser.cpp
+
 
 DEPS += \
 ${addprefix ./, \
 $(OUTPUT)Query.d \
+$(OUTPUT)InvalidTokenException.d \
 $(OUTPUT)QueryParser.d \
 }
 
 OBJS += \
 ./$(OUTPUT)Query.o \
+./$(OUTPUT)InvalidTokenException.o \
 ./$(OUTPUT)QueryParser.o
 
 all: build
