@@ -23,7 +23,7 @@ void QueryParser::Parse( string text, vector<Query*>& query )
   	}
 }
 
-Query *QueryParser::processToken( string token )
+Query *QueryParser::processToken( string token ) throw(InvalidTokenException)
 {
 	bool mustInclude = token[0] == '+';
 	bool mustExclude = token[0] == '-';
@@ -31,8 +31,8 @@ Query *QueryParser::processToken( string token )
 	if ( mustInclude || mustExclude )
 		token.erase(0,1);
 
-//	if ( token.length() == 0 )
-		// error
+	if ( token.length() == 0 )
+		throw InvalidTokenException();
 
 	vector<string> ws;
 	tokenize( token, ws, "^" );
@@ -47,10 +47,11 @@ Query *QueryParser::processToken( string token )
 			word = ws[0];
 			char *ep = 0;
 			weight = std::strtol( ws[1].c_str(), &ep, 10);
-			// if ( weight == 0 )
-			 	// error
+			if ( weight == 0 )
+				throw InvalidTokenException();
 		}
-	//	else error
+		else
+			throw InvalidTokenException();
 
 	Query *q = new Query(word, mustInclude, mustExclude, weight );
 	return q;

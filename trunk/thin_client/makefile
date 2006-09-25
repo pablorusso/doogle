@@ -3,9 +3,10 @@
 -include ../makefile.def
 
 OUTPUT_FILE := thin_client.out
-CPP_SRCS    += $(SRC)main.cpp
-DEPS 	    += ${ addprefix ./, $(OUTPUT)main.d }
-OBJS 	    += $(OUTPUT)main.o
+CPP_SRCS    += $(SRC)main.cpp $(SRC)SearchResultWriter.cpp
+DEPS 	    += ${ addprefix ./, $(OUTPUT)main.d $(OUTPUT)SearchResultWriter.d }
+OBJS 	    += $(OUTPUT)main.o $(OUTPUT)SearchResultWriter.o
+
 LIBS 	    := -lparser_query
 INC  	    := -I$(LIB)
 
@@ -21,7 +22,7 @@ $(OUTPUT_FILE): $(LIB)/libparser_query.a $(USER_OBJS) $(OBJS)
 	@echo 'Finished building target: $@'
 	$(COPY) $(SRC)result.template $(OUTPUT)
 	@echo ' '
-	
+
 $(OUTPUT)%.o: $(SRC)%.cpp
 	@echo 'Building file: $<'
 	@echo 'Making dir: ' $(MKDIR) $(OUTPUT)
@@ -44,6 +45,7 @@ depends:
 	$(COPY) $(STAGE)libparser_query.a $(LIB)
 	$(COPY) $(STAGE)Query.h $(LIB)
 	$(COPY) $(STAGE)QueryParser.h $(LIB)
+	$(COPY) $(STAGE)InvalidTokenException.h $(LIB)
 
 clean:
 	@echo 'Cleaning...'

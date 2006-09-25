@@ -2,7 +2,7 @@
 	<head>
 		<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
 			<title>$WORD$ - Busqueda en Doogle</title>
-			
+
 			<style>
 				<!--
 				body,td,div,.p,a{font-family:arial,sans-serif}
@@ -30,9 +30,9 @@
 				.sm{display:block;margin-top:0;margin-bottom:0;margin-left:40px}
 				-->
 			</style>
-			
+
 			<script><!--//--></script><noscript></noscript>
-			
+
 			<script>
 			<!--
 			function ss(w,id){window.status=w;return true;}
@@ -47,7 +47,7 @@
 <body bgcolor=#ffffff onload="document.gs.reset();" topmargin=3 marginheight=3>
 
 	<table border=0 cellspacing=0 cellpadding=0 width=100%><tr height=4><td> <img alt="" width=1 height=1></td></tr></table>
-	
+
 	<table border=0 cellpadding=0 cellspacing=0 width=100%>
 		<tr>
 			<form name=gs method=POST action="thin_client.out">
@@ -58,9 +58,9 @@
 				</td>
 				<td>&nbsp;&nbsp;</td>
 				<td valign=top width=100% style="padding-top:0px">
-	
+
 					<table cellpadding=0 cellspacing=0 border=0>
-	
+
 						<tr><td height=14 valign=bottom>
 							<script><!--
 							function qs(el) {if (window.RegExp && window.encodeURIComponent) {var ue=el.href;var qe=encodeURIComponent(document.gs.q.value);if(ue.indexOf("q=")!=-1){el.href=ue.replace(new RegExp("q=[^&$]*"),"q="+qe);}else{el.href=ue+"&q="+qe;}}return 1;}
@@ -75,28 +75,28 @@
 								<input type=text name=bsearch size=41 maxlength=2048 value="$WORD$" title="Busqueda">
 								<font size=-1>
 								<input type=submit name="btnD" value="Busqueda">
-		
+
 								<span id=hf></span>
 								</font>
 							</td>
 						</table>
 					</td></tr>
-					
+
 					</table>
 				</td>
 			</form>
 		</tr>
 	</table>
-	
-	
+
+
 	<table border=0 cellpadding=0 cellspacing=0 width=100% class="t bt">
 		<tr>
 			<td nowrap><font size=+1>&nbsp;<b>Resultados</b></font>&nbsp;</td>
-			<td align=right nowrap><font size=-1>Se encontraron <b>$CANTIDAD$</b> documentos en <b>$TIEMPO$</b> segundos&nbsp;</font></td>
+			<td align=right nowrap><font size=-1>Se encontraron <b>$CANTIDAD$</b> documentos&nbsp;</font></td>
 		</tr>
-	</table>    
+	</table>
 
-	$DOCS$	
+	$CONTENT$
 
 	<br clear=all>
 	<center>
@@ -130,6 +130,9 @@
 			</table>
 			<br>
 			<font size=-1 class=p>&copy;2006 Doogle</font>
+			<br>
+			<br>
+			<font size=-1 class=p>&copy;thin_client version: $VERSION$</font>
 	</center>
 </body>
 </html>

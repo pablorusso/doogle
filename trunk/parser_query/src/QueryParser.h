@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Query.h"
+#include "InvalidTokenException.h"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ class QueryParser
 {
 private:
 	static void tokenize( const string& str, vector<string>& tokens, const string& delimiters = " " );
-	static Query *processToken( string token );
+	static Query *processToken( string token ) throw(InvalidTokenException);
 public:
 	QueryParser();
 	virtual ~QueryParser();
