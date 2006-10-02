@@ -95,6 +95,31 @@ stage: localstage build
 	@echo ' '
 	@echo 'Stage actualizado con exito'
 
+deploy: localstage build
+	@echo 'Copiando archivos al stage del repositorio...'
+	@echo ' '
+
+	@echo Copiando dependencias binarias:;
+	@if [ -d $(LIB) ]; then \
+	for i in $(LIB)*; do \
+	if [ -f $$i ]; then \
+		j=$${i#$(LIB)}; \
+		echo $(COPY) $$i $(REPO_STAGE)$$j; \
+		$(COPY) $$i $(REPO_STAGE)$$j; \
+	fi done fi
+	
+	@echo Copiando headers:;
+	@for i in $(OUTPUT)*.h; do if [ -f $$i ]; then j=$${i#$(OUTPUT)}; echo $(COPY) $$i $(REPO_STAGE)$$j; $(COPY) $$i $(REPO_STAGE)$$j; fi done;
+	
+	@echo Copiando output:;
+	@echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $(REPO_STAGE);
+	@$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(REPO_STAGE);
+	
+	@echo "Copiando archivos extra la stage";
+	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(REPO_STAGE)$$j; $(COPY) $$i $(REPO_STAGE)$$j; fi done;
+	@echo ' '
+	@echo 'Stage del repositorio actualizado con exito'
+
 clean:
 	@echo 'Limpienza...'
 	@echo ' '	
@@ -122,3 +147,5 @@ stageclean: distclean
 	@echo 'El stage se limpio con exito'
 
 rebuild : clean build
+
+redistbuild : distclean build
