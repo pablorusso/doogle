@@ -1,0 +1,139 @@
+<html>
+	<head>
+		<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+			<title>$WORD$ - Busqueda en Doogle</title>
+
+			<style>
+				<!--
+				body,td,div,.p,a{font-family:arial,sans-serif}
+				div,td{color:#000}
+				.f{color:#6f6f6f}
+				.flc,.fl:link{color:#77c}
+				a:link,.w,a.w:link,.w a:link,.q:visited,.q:link,.q:active,.q{color:#00c}
+				a:visited,.fl:visited{color:#551a8b}
+				a:active,.fl:active{color:#f00}
+				.t{background:#e5ecf9;color:#000}
+				.bb{border-bottom:1px solid #36c}
+				.bt{border-top:1px solid #36c}
+				.j{width:34em}
+				.h{color:#36c;font-size:14px}
+				.i,.i:link{color:#a90a08}
+				.a,.a:link{color:#008000}
+				.z{display:none}
+				div.n{margin-top:1ex}
+				.n a{font-size:10pt;color:#000}
+				.n .i{font-size:10pt;font-weight:bold}
+				.b a{font-size:12pt;color:#00c;font-weight:bold}
+				.ch{cursor:pointer;cursor:hand}
+				.e{margin-top:.75em;margin-bottom:.75em}
+				.g{margin-top:1em;margin-bottom:1em}
+				.sm{display:block;margin-top:0;margin-bottom:0;margin-left:40px}
+				-->
+			</style>
+
+			<script><!--//--></script><noscript></noscript>
+
+			<script>
+			<!--
+			function ss(w,id){window.status=w;return true;}
+			function cs(){window.status='';}
+			function rwt(el,oi,cad,ct,cd,sg_url,sg){var e = window.encodeURIComponent ? encodeURIComponent : escape;var oi_param="";var cad_param="";var p = el.href.split("#");var sig_url="";if (oi) oi_param="&oi="+e(oi);if (cad) cad_param="&cad="+e(cad);if (sg_url) sig_url="&sig="+sg_url;el.href="/url?sa=t"+oi_param+cad_param+"&ct="+e(ct)+"&cd="+e(cd)+"&url="+e(p[0]).replace(/\+/g,"%2B")+"&ei=wGcORaXHDYLGwQLNt9mbCA"+sig_url+sg+(p[1]?"#"+p[1]:"");el.onmousedown="";return true;}
+			var bdg = 0;function sb() {bdg = 1;}function ga(o,e) {if (document.getElementById) {var a = o.id.substring(1); var p = "", r = "", t, f, h;var g = e.target;if (g) { t = g.id;f = g.parentNode;if (f) {p = f.id;h = f.parentNode;if (h)r = h.id;}} else {h = e.srcElement;f = h.parentNode;if (f)p = f.id;t = h.id;}if (t==a || p==a || r==a)return true;document.getElementById(a).href += "&ct=b" + (bdg ? "d" : "g");bdg = 0;top.location.href=document.getElementById(a).href}}
+			function anbc(id) {if (document && document.getElementById) {var o = document.getElementById(id);if (o && o.href) {document.location = o.href;}}}
+			//-->
+			</script>
+</head>
+
+<body bgcolor=#ffffff onload="document.gs.reset();" topmargin=3 marginheight=3>
+
+	<table border=0 cellspacing=0 cellpadding=0 width=100%><tr height=4><td> <img alt="" width=1 height=1></td></tr></table>
+
+	<table border=0 cellpadding=0 cellspacing=0 width=100%>
+		<tr>
+			<form name=gs method=POST action="thin_client.out">
+				<td valign=top>
+					<a href="http://localhost/doogle/">
+						<img src="../images/logo_sm.gif" width=150 height=55 alt="Vaya a la página principal de Doogle" border=0 vspace=12>
+					</a>
+				</td>
+				<td>&nbsp;&nbsp;</td>
+				<td valign=top width=100% style="padding-top:0px">
+
+					<table cellpadding=0 cellspacing=0 border=0>
+
+						<tr><td height=14 valign=bottom>
+							<script><!--
+							function qs(el) {if (window.RegExp && window.encodeURIComponent) {var ue=el.href;var qe=encodeURIComponent(document.gs.q.value);if(ue.indexOf("q=")!=-1){el.href=ue.replace(new RegExp("q=[^&$]*"),"q="+qe);}else{el.href=ue+"&q="+qe;}}return 1;}
+							// -->
+							</script>
+						</td></tr>
+					<tr><td>
+						<table border=0 cellpadding=0 cellspacing=0>
+							<tr>
+							<td nowrap>
+								<input type=hidden name=hl value="es">
+								<input type=text name=bsearch size=41 maxlength=2048 value="$WORD$" title="Busqueda">
+								<font size=-1>
+								<input type=submit name="btnD" value="Busqueda">
+
+								<span id=hf></span>
+								</font>
+							</td>
+						</table>
+					</td></tr>
+
+					</table>
+				</td>
+			</form>
+		</tr>
+	</table>
+
+
+	<table border=0 cellpadding=0 cellspacing=0 width=100% class="t bt">
+		<tr>
+			<td nowrap><font size=+1>&nbsp;<b>Resultados</b></font>&nbsp;</td>
+			<td align=right nowrap><font size=-1>Se encontraron <b>$CANTIDAD$</b> documentos&nbsp;</font></td>
+		</tr>
+	</table>
+
+	$CONTENT$
+
+	<br clear=all>
+	<center>
+
+	<br clear=all><br>
+	<table border=0 cellpadding=0 cellspacing=0 width=100% class="t bb bt">
+		<tr><td align=center>&nbsp;<br>
+			<table border=0 cellpadding=0 cellspacing=0 align=center>
+				<form method=POST action="thin_client.out" name=f>
+				<tr><td nowrap>
+					<input type=hidden name=hl value="es">
+					<input type=text name=bsearch size=31 maxlength=2048 value="$WORD$" title="Busqueda">
+					<font size=-1>
+					<input type=submit name="btnD" value="Busqueda">
+					</font>
+				</td></tr>
+				</form>
+			</table>
+			<br>
+		</td></tr>
+	</table>
+	</center>
+
+	<center>
+		<p>
+		<hr class=z>
+			<table border=0 cellpadding=2 cellspacing=0 width=100%>
+			<tr><td align=center>
+				<font size=-1><a href="/doogle/">Pagina principal de Doogle</a></font>
+			</td></tr>
+			</table>
+			<br>
+			<font size=-1 class=p>&copy;2006 Doogle</font>
+			<br>
+			<br>
+			<font size=-1 class=p>&copy;thin_client version: $VERSION$</font>
+	</center>
+</body>
+</html>
+
