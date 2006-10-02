@@ -2,6 +2,7 @@
 #include "QueryParser.h"
 #include "InvalidTokenException.h"
 #include "SearchResultWriter.h"
+#include "CGIClass.h"
 
 void showError( string msg )
 {
@@ -11,52 +12,41 @@ void showError( string msg )
 	cout << "</b#include <string>ody></html>";
 }
 
-string parseQueryString( string buff )
-{
-	string::size_type pos = buff.find ( "bsearch=", 0 );
-	if ( pos != string::npos )
-	{
-		pos = pos + 8;
-		string::size_type pos2 = buff.find ( "&", pos );
-		if ( pos2 != string::npos )
-			return buff.substr( pos, pos2 - pos );
-	}
-	return "";
-}
-
 int main(int argc, char* argv[])
 {
+	char* lpszContentLength = getenv("CONTENT_LENGTH");
+	if(lpszContentLength == NULL) return -1;
+	int nContentLength = atoi(lpszContentLength);
+	if(nContentLength == 0) return -1;
+
 	string errorMsg = "";
-	string word;
-
-	if ( argc == 1 )
-	{ // POST
-		cin >> word;
-		word = parseQueryString( word );
-	}
-	else
-	{  // GET
-		word = argv[1];
-	}
-
+	CGIClass cgi;
 	vector<Query *> query;
 	vector<string>  docs;
-	cout << "Content-type: text/html" << endl << endl << endl;
+
+	string word;
+	if ( argc == 1 )
+		cin >> word; // POST
+	else
+		word = argv[1]; // GET
+
+	cgi.Load( word );
+	string name  = "bsearch";
+	string value = cgi.GetValue( name );
+
 	try
 	{
-		// Parseo la consulta
-		QueryParser::Parse( word, query );
-		// llamo al buscador
-
+		QueryParser::Parse( value, query );
 	}
 	catch( InvalidTokenException ex )
 	{
 		errorMsg = ex.what();
 	}
 
+	cout << "Content-type: text/html" << endl << endl << endl;
 	try
 	{
-		SearchResultWriter writer( word, errorMsg, docs );
+		SearchResultWriter writer( value, errorMsg, docs );
 		cout << writer.getResult();
 	}
 	catch( ... )
