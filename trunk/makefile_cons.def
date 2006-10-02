@@ -9,7 +9,7 @@ COPY   = cp
 SRC    = src/
 LIB    = lib/
 OUTPUT = bin/
-STAGE  = ../../stage/
+STAGE  = ../stage/
 
 CPP_SRCS 	:= $(wildcard $(SRC)*.cpp)
 HPP_SRCS 	:= $(wildcard $(SRC)*.h)
