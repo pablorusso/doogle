@@ -1,0 +1,116 @@
+/**************************************/
+ Instrucciones para el uso del MAKEFILE
+/**************************************/
+
+Introduccion a la estructura de proyectos
+/////////////////////////////////////////
+
+Cada proyecto se divide de la siguiente forma:
+
+	src -> codigo fuente
+	bin -> binarios generados por el programa
+	lib -> dependencias
+        makefile	
+
+Por lo tanto dado un proyecto cualquiera, por ejemplo: parser_query, tenemos:
+
+    -- parser_query
+	-- src
+	-- bin
+	-- lib
+        makefile
+
+las carpeta bin y lib puede ser eliminadas en cualquier momento ya que las genera el makefile, la carpeta src es la que tiene el codigo y mapea contra el repositorio.
+
+A su vez, en la carpeta raiz, hay otro makefile que en orden compila todos los proyectos.
+
+Manejo de dependencias
+//////////////////////
+
+El manejo de dependencias se refiere a como y donde un proyecto determinado encuentra los archivos de otro proyecto que necesita para funcionar. Ejemplo sencillo seria tener una libreria Math que resuelva ecuaciones y un programa autocad que la utilice. Para que autocad pueda utilizar la libreria math tiene que encontrar 2 cosas:
+  1) el .a o lib, binario de la libreria
+  2) el .h o header, interfaz de la libreria
+A su vez, es importante tambien tener control sobre le impacto de las modificaciones, ya que un cambio en Math puede romper algo en autocad asi que debe ser autocad el que decida cuando actualizar sus referencias.
+
+Para resolver esta problematica se emplea la siguiente tecnica:
+  1) Los proyectos buscan sus dependencias en la carpeta /lib dentro del proyecto.
+  2) Si no encuentra la dependencia buscada, entonces la busca en la carpeta stage local.
+  3) Si la carpeta stage local no existe, la crea utilizando la ultima version de la carpeta stage subida al repositorio.
+  4) Una vez que encuentra la carpeta stage, copia el archivo necesario a la carpeta /lib
+  5) Finalmente, luego de este procesos quedan dos salidas, el archivo es encontrado ahora si en /lib o el archivo no 
+     se encuentra y la compilacion falla 
+
+El tener dos carpetas stage, una local y otra dentro del repositorio es un plus que permite evitar la compilacion de todos 
+los proyectos y simplemente "bajar" del repositorio la ultima version estable de los mismo.
+Por lo tanto un update standard seria "traer la carpeta del proyecto en el cual yo estoy trabajando y traer el stage remoto"
+
+ 
+Despliegues existentes:
+///////////////////////
+
+build [default]: Compila el codigo fuente, busca todas las dependecias en /lib. Sino esta en lib va hasta el stage 
+		 y lo trae, si esta en lib toma esa dependecia sin actualizar con la ultima.
+
+clean: borra la carpeta bin (salida del proyecto
+
+distclean: borra la carpeta bin y lib (salida y dependencias).
+
+rebuild: clean+build
+
+redistbuild: distclean+build
+
+depends: actualiza desde el stage local las dependencias, copiando los archivos a lib 
+	 [si el proyecto no tiene dependencias este objetivo no se encuentra]
+
+localstage: En caso de que no exista, crea la carpeta local con una copia de lo que hay en el stage remoto.
+
+stage: copia la salida del proyecto al stage local.
+
+deploy: copia la salida del proyecto al stage remoto.
+
+
+FAQ
+///
+
+1) Me baje del repositorio del proyecto X por primera vez las cosas: 
+	/doogle/X/make stage
+
+2) Estoy programando X y quiero ver si compila: 
+	/doogle/X/make build
+
+3) Estoy programando el programa X y el programa Y. Y tiene dependencia con X, cambio algo en X y quiero probarlo desde Y:
+	/doogle/X/make stage
+	cd..
+	cd Y
+	/doogle/Y/make redistbuild
+.
+4) Termine de programar una parte de mi modulo, quiero subirlo al stage remoto:
+	/doogle/X/make deploy
+	cd /doogle/stage/
+	svn commit
+	
+Template de MAKEFILE para nuevo proyecto
+////////////////////////////////////////
+
+Si se necesita crear un nuevo proyecto el makefile se debe ser asi:
+
+/----------------------- make comienza aqui ---------------------/
+# Start variables - just edit this part
+
+OUTPUT_FILE   := [nombre_archivo].[extension]
+IS_LIB	      := [0|1]
+DEP_LIB_NAME  := [binary_dependency_file_list]
+DEP_INC	      := [header_dependency_file_list]
+SRC_TO_OUTPUT := [extra_files_to_be_copied]
+# End variables - do not edit anything below this part
+
+-include ../makefile.def
+/----------------------- make termina aqui ---------------------/
+
+Donde:
+	OUTPUT_FILE: Nombre del archivo de salida
+	IS_LIB: 1 Indica que se generará una libreria, 0 se generará un archivo ejecutable
+	DEP_LIB_NAME: Lista separada por espacios de las dependencias binarias que tiene el proyecto
+	DEP_INC: Lista separada por espacios de las dependencias con .h que tiene el proyecto
+	SRC_TO_OUTPUT: Lista separada por espacios de los archivos que no se incluyen en la compilacion 
+		       pero que deben ser desplegados. Ej: index.html
