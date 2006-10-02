@@ -34,7 +34,7 @@ $(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
 		echo $(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
 		$(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
 	fi
-	@echo "Copiando archivos extra la stage";
+	@echo "Copiando archivos extra a la carpeta de salida";
 	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(OUTPUT)$$j; $(COPY) $$i $(OUTPUT)$$j; fi done;
 	@echo ' '	
 	@echo 'Termine con : $<'
@@ -47,7 +47,20 @@ ifneq ($(DEP_LIB_WS),)
 $(DEP_LIB_WS): depends
 endif
 
-depends:
+localstage:
+	@echo 'Generando stage local:'
+	@echo ' '
+	@if [ -d $(STAGE) ]; then \
+		echo 'El local stage ya existe. No hay nada que hacer. Saliendo.'; \
+	else \
+		echo $(MKDIR) $(STAGE); \
+		$(MKDIR) $(STAGE); \
+		for i in $(REPO_STAGE)*; do if [ -f $$i ]; then j=$${i#$(REPO_STAGE)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done; \
+		echo 'Stage local generado'; \
+	fi
+	
+
+depends: localstage
 	@echo 'Compilando dependencias...'
 	@echo ' '	
 	@echo 'Creando directorio de dependencias: ' $(MKDIR) $(LIB)
@@ -57,9 +70,10 @@ depends:
 	@echo 'Cropiando dependencias con headers: ' $(COPY) $(DEP_INC_WS) $(LIB)
 	@$(COPY) $(DEP_INC_WS) $(LIB)
 
-stage: build
+stage: localstage build
 	@echo 'Copiando archivos al stage...'
 	@echo ' '
+
 	@echo Copiando dependencias binarias:;
 	@if [ -d $(LIB) ]; then \
 	for i in $(LIB)*; do \
