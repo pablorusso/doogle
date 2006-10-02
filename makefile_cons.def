@@ -1,0 +1,31 @@
+#!/bin/bash
+SHELL  = /bin/bash
+
+RM     = rm -rf
+RMDIR  = rmdir
+MKDIR  = mkdir -p
+COPY   = cp
+
+SRC    = src/
+LIB    = lib/
+OUTPUT = bin/
+STAGE  = ../../stage/
+
+CPP_SRCS 	:= $(wildcard $(SRC)*.cpp)
+HPP_SRCS 	:= $(wildcard $(SRC)*.h)
+SOURCES  	:= $(notdir $(CPP_SRCS))
+OBJS     	:= $(addprefix ./$(OUTPUT), $(SOURCES:.cpp=.o) )
+
+ifneq ($(DEP_LIB_NAME), )
+	LIBS 		:= -l$(DEP_LIB_NAME)
+	DEP_LIB 	:= $(addprefix lib, $(DEP_LIB_NAME)).a
+	DEP_LIB_WS 	:= $(addprefix $(STAGE), $(DEP_LIB))
+endif
+
+ifneq ($(DEP_INC), )
+	DEP_INC_WS := $(addprefix $(STAGE), $(DEP_INC))
+endif
+
+ifneq ($(SRC_TO_OUTPUT), )
+	SRC_TO_OUTPUT_W_PATH := $(addprefix $(SRC), $(SRC_TO_OUTPUT))
+endif 
