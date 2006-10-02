@@ -1,12 +1,110 @@
-SHELL  = /bin/bash
+include ../makefile_cons.def
 
-SRC    = src/
-LIB    = lib/
-DOC    = doc/
-OUTPUT = bin/
-STAGE  = ../../stage/
+all: build
 
-RM     = rm -rf
-RMDIR  = rmdir
-MKDIR  = mkdir -p
-COPY   = cp
+build: $(OUTPUT_FILE)
+
+$(OUTPUT_FILE): $(DEP_INC_WS) $(DEP_LIB_WS) $(OBJS)
+	@echo 'Linkeando o empaquetando: $@'
+	@if [ $(IS_LIB) == 1 ]; then \
+		echo 'Utilizando: GCC Archiver';  \
+		echo ar -r $(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS);  \
+		ar -r $(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS);  \
+	else \
+		echo 'Utilizando: GCC C++ Linker'; \
+		echo g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS); \
+		g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS); \
+	fi;
+	@echo 'Linkeo o paquete completo para: $@'
+	@echo ' '
+
+$(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
+	@echo 'Compilando archivo: $<'
+	@echo 'Creando carpeta destino: ' $(MKDIR) $(OUTPUT)
+	@$(MKDIR) $(OUTPUT)
+	@echo 'Utilizando: GCC C++ Compiler'
+	@echo g++ -O0 -g3 -Wall -c -fmessage-length=0 -o$@ $<
+	@g++ -I$(LIB) -O0 -g3 -Wall -c -fmessage-length=0 -o$@ $< && \
+	echo -n $(@:%.o=%.d) $(dir $@) > $(@:%.o=%.d) && \
+	g++ -MM -MG -P -w -I$(LIB) -O0 -g3 -Wall -c -fmessage-length=0  $< >> $(@:%.o=%.d)
+	@echo 'Compilacion terminada para: $<'
+	@hfile=$(notdir $(@:%.o=%.h)); \
+	echo 'Copiando encabezados (.h) a la carpeta de salida: ' $(SRC)$$hfile; \
+	if [ -f $(SRC)$$hfile ]; then \
+		echo $(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
+		$(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
+	fi
+	@echo "Copiando archivos extra la stage";
+	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(OUTPUT)$$j; $(COPY) $$i $(OUTPUT)$$j; fi done;
+	@echo ' '	
+	@echo 'Termine con : $<'
+
+ifneq ($(DEP_INC_WS),)
+$(DEP_INC_WS): depends
+endif
+
+ifneq ($(DEP_LIB_WS),)
+$(DEP_LIB_WS): depends
+endif
+
+depends:
+	@echo 'Compilando dependencias...'
+	@echo ' '	
+	@echo 'Creando directorio de dependencias: ' $(MKDIR) $(LIB)
+	@$(MKDIR) $(LIB)
+	@echo 'Cropiando dependencias binarias: ' $(COPY) $(DEP_LIB_WS) $(LIB)
+	@$(COPY) $(DEP_LIB_WS) $(LIB)
+	@echo 'Cropiando dependencias con headers: ' $(COPY) $(DEP_INC_WS) $(LIB)
+	@$(COPY) $(DEP_INC_WS) $(LIB)
+
+stage: build
+	@echo 'Copiando archivos al stage...'
+	@echo ' '
+	@echo Copiando dependencias binarias:;
+	@if [ -d $(LIB) ]; then \
+	for i in $(LIB)*; do \
+	if [ -f $$i ]; then \
+		j=$${i#$(LIB)}; \
+		echo $(COPY) $$i $(STAGE)$$j; \
+		$(COPY) $$i $(STAGE)$$j; \
+	fi done fi
+	
+	@echo Copiando headers:;
+	@for i in $(OUTPUT)*.h; do if [ -f $$i ]; then j=$${i#$(OUTPUT)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done;
+	
+	@echo Copiando output:;
+	@echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE);
+	@$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE);
+	
+	@echo "Copiando archivos extra la stage";
+	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done;
+	@echo ' '
+	@echo 'Stage actualizado con exito'
+
+clean:
+	@echo 'Limpienza...'
+	@echo ' '	
+	@echo 'Borrando carpeta de salida:'
+	@if [ -d $(OUTPUT) ]; then echo $(RM) $(OUTPUT)*.*; $(RM) $(OUTPUT)*.*; fi
+	@if [ -d $(OUTPUT) ]; then echo $(RMDIR) $(OUTPUT); $(RMDIR) $(OUTPUT); fi
+	@echo ' '
+	@echo 'Limpieza realizada con exito'
+
+distclean: clean
+	@echo 'Limpiando la distribucion...'
+	@echo ' '	
+	@echo 'Borrando carpeta de dependencias:'
+	@if [ -d $(LIB) ]; then echo $(RM) $(LIB)*.*; $(RM) $(LIB)*.*; fi
+	@if [ -d $(LIB) ]; then echo $(RMDIR) $(LIB); $(RMDIR) $(LIB); fi
+	@echo ' '
+	@echo 'La distribucion se limpio con exito'
+
+stageclean: distclean
+	@echo 'Limpiando stage...'
+	@echo ' '	
+	@echo 'Borrando carpeta de stage:'
+	@if [ -d $(STAGE) ]; then echo $(RM) $(STAGE)*.*; $(RM) $(STAGE)*.*; fi
+	@echo ' '
+	@echo 'El stage se limpio con exito'
+
+rebuild : clean build
