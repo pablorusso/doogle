@@ -5,6 +5,7 @@ all: build
 build: $(OUTPUT_FILE)
 
 $(OUTPUT_FILE): $(DEP_INC_WS) $(DEP_LIB_WS) $(OBJS)
+	@echo ' '	
 	@echo 'Linkeando o empaquetando: $@'
 	@if [ $(IS_LIB) == 1 ]; then \
 		echo 'Utilizando: GCC Archiver';  \
@@ -15,10 +16,13 @@ $(OUTPUT_FILE): $(DEP_INC_WS) $(DEP_LIB_WS) $(OBJS)
 		echo g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS); \
 		g++ -L$(LIB) -o$(OUTPUT)$(OUTPUT_FILE) $(OBJS) $(LIBS); \
 	fi;
+	@echo "Copiando archivos extra a la carpeta de salida";
+	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(OUTPUT)$$j; $(COPY) $$i $(OUTPUT)$$j; fi done;
 	@echo 'Linkeo o paquete completo para: $@'
 	@echo ' '
 
 $(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
+	@echo ' '	
 	@echo 'Compilando archivo: $<'
 	@echo 'Creando carpeta destino: ' $(MKDIR) $(OUTPUT)
 	@$(MKDIR) $(OUTPUT)
@@ -34,11 +38,9 @@ $(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
 		echo $(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
 		$(COPY) $(SRC)$$hfile $(OUTPUT)$$hfile; \
 	fi
-	@echo "Copiando archivos extra a la carpeta de salida";
-	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(OUTPUT)$$j; $(COPY) $$i $(OUTPUT)$$j; fi done;
-	@echo ' '	
 	@echo 'Termine con : $<'
-
+	@echo ' '
+	
 ifneq ($(DEP_INC_WS),)
 $(DEP_INC_WS): depends
 endif
