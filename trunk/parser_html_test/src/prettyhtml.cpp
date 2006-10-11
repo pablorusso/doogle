@@ -153,8 +153,13 @@ void			usage();
 	/////////// Parse specified file //////////////////////////////////////
 
 	Root_Node *const root = html_parse( file.begin(), file.end(), true );
-	if ( root ) {
-		cout << root->write( 0 );
+	if ( root )
+	{
+		for ( Content_Node::iterator childIt = root->begin(); childIt != root->end(); ++childIt )
+		{
+			HTML_Tree::HTML_Node *node = *childIt;
+			cout << "nombre:" << node->write( 0 ) << endl;
+		}
 		delete root;
 	}
 	::exit( 0 );

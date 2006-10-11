@@ -18,7 +18,6 @@ void doTest( string test )
 		cout << "included: " << (*output_iter)->mustBeIncluded() << endl;
 		cout << "excluded: " << (*output_iter)->mustBeExcluded() << endl;
 		cout << "weight: " << (*output_iter)->getWeight() << endl;
-
 		delete *output_iter;
 	}
 	cout << endl << "------------------------------------------------------" << endl;
@@ -33,6 +32,7 @@ int main()
 	doTest( "t1^2 t2 t3" );
 	doTest( "-t1 +t2 t3^4" );
 
+	/*
 	// invalidos
 	doTest( "&t1" );
 	doTest( "" );
@@ -40,4 +40,5 @@ int main()
 	doTest( "t1^n" );
 	doTest( "t1^^n" );
 	doTest( "t1^^n" );
+	*/
 }
