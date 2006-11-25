@@ -5,7 +5,7 @@ all: build
 build: $(OUTPUT_FILE)
 
 $(OUTPUT_FILE): $(DEP_INC_WS) $(DEP_LIB_WS) $(OBJS)
-	@echo ' '	
+	@echo ' '
 	@echo 'Linkeando o empaquetando: $@'
 	@if [ $(IS_LIB) == 1 ]; then \
 		echo 'Utilizando: GCC Archiver';  \
@@ -22,7 +22,7 @@ $(OUTPUT_FILE): $(DEP_INC_WS) $(DEP_LIB_WS) $(OBJS)
 	@echo ' '
 
 $(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
-	@echo ' '	
+	@echo ' '
 	@echo 'Compilando archivo: $<'
 	@echo 'Creando carpeta destino: ' $(MKDIR) $(OUTPUT)
 	@$(MKDIR) $(OUTPUT)
@@ -40,7 +40,7 @@ $(OUTPUT)%.o: $(SRC)%.cpp $(HPP_SRCS)
 	fi
 	@echo 'Termine con : $<'
 	@echo ' '
-	
+
 ifneq ($(DEP_INC_WS),)
 $(DEP_INC_WS): depends
 endif
@@ -60,16 +60,16 @@ localstage:
 		for i in $(REPO_STAGE)*; do if [ -f $$i ]; then j=$${i#$(REPO_STAGE)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done; \
 		echo 'Stage local generado'; \
 	fi
-	
+
 
 depends: localstage
 	@echo 'Compilando dependencias...'
-	@echo ' '	
+	@echo ' '
 	@echo 'Creando directorio de dependencias: ' $(MKDIR) $(LIB)
 	@$(MKDIR) $(LIB)
-	@echo 'Cropiando dependencias binarias: ' $(COPY) $(DEP_LIB_WS) $(LIB)
+	@echo 'Copiando dependencias binarias: ' $(COPY) $(DEP_LIB_WS) $(LIB)
 	@$(COPY) $(DEP_LIB_WS) $(LIB)
-	@echo 'Cropiando dependencias con headers: ' $(COPY) $(DEP_INC_WS) $(LIB)
+	@echo 'Copiando dependencias con headers: ' $(COPY) $(DEP_INC_WS) $(LIB)
 	@$(COPY) $(DEP_INC_WS) $(LIB)
 
 stage: localstage build
@@ -84,14 +84,14 @@ stage: localstage build
 		echo $(COPY) $$i $(STAGE)$$j; \
 		$(COPY) $$i $(STAGE)$$j; \
 	fi done fi
-	
+
 	@echo Copiando headers:;
 	@for i in $(OUTPUT)*.h; do if [ -f $$i ]; then j=$${i#$(OUTPUT)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done;
-	
+
 	@echo Copiando output:;
 	@echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE);
 	@$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(STAGE);
-	
+
 	@echo "Copiando archivos extra la stage";
 	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(STAGE)$$j; $(COPY) $$i $(STAGE)$$j; fi done;
 	@echo ' '
@@ -109,14 +109,14 @@ deploy: localstage build
 		echo $(COPY) $$i $(REPO_STAGE)$$j; \
 		$(COPY) $$i $(REPO_STAGE)$$j; \
 	fi done fi
-	
+
 	@echo Copiando headers:;
 	@for i in $(OUTPUT)*.h; do if [ -f $$i ]; then j=$${i#$(OUTPUT)}; echo $(COPY) $$i $(REPO_STAGE)$$j; $(COPY) $$i $(REPO_STAGE)$$j; fi done;
-	
+
 	@echo Copiando output:;
 	@echo $(COPY) $(OUTPUT)$(OUTPUT_FILE) $(REPO_STAGE);
 	@$(COPY) $(OUTPUT)$(OUTPUT_FILE) $(REPO_STAGE);
-	
+
 	@echo "Copiando archivos extra la stage";
 	@for i in $(SRC_TO_OUTPUT_W_PATH); do if [ -f $$i ]; then j=$${i#$(SRC)}; echo $(COPY) $$i $(REPO_STAGE)$$j; $(COPY) $$i $(REPO_STAGE)$$j; fi done;
 	@echo ' '
@@ -124,7 +124,7 @@ deploy: localstage build
 
 clean:
 	@echo 'Limpienza...'
-	@echo ' '	
+	@echo ' '
 	@echo 'Borrando carpeta de salida:'
 	@if [ -d $(OUTPUT) ]; then echo $(RM) $(OUTPUT)*.*; $(RM) $(OUTPUT)*.*; fi
 	@if [ -d $(OUTPUT) ]; then echo $(RMDIR) $(OUTPUT); $(RMDIR) $(OUTPUT); fi
@@ -133,7 +133,7 @@ clean:
 
 distclean: clean
 	@echo 'Limpiando la distribucion...'
-	@echo ' '	
+	@echo ' '
 	@echo 'Borrando carpeta de dependencias:'
 	@if [ -d $(LIB) ]; then echo $(RM) $(LIB)*.*; $(RM) $(LIB)*.*; fi
 	@if [ -d $(LIB) ]; then echo $(RMDIR) $(LIB); $(RMDIR) $(LIB); fi
@@ -142,7 +142,7 @@ distclean: clean
 
 stageclean: distclean
 	@echo 'Limpiando stage...'
-	@echo ' '	
+	@echo ' '
 	@echo 'Borrando carpeta de stage:'
 	@if [ -d $(STAGE) ]; then echo $(RM) $(STAGE)*.*; $(RM) $(STAGE)*.*; fi
 	@echo ' '

@@ -7,6 +7,7 @@
 #include <sys/param.h>
 
 #include "ParserWrapper.h"
+#include "Lexical.h"
 
 using namespace std;
 
@@ -38,7 +39,10 @@ void parsearPath( string path )
 		exit(0);
 	}
 
-	ParserWrapper parser( NULL );
+	ParserWrapper parser;
+	Lexical *lex = new Lexical();
+	parser.SetLexical( lex );
+
 	for ( i=0; i < count; ++i )
 	{
 		string fileName = path + "/" + files[i]->d_name;
@@ -71,6 +75,8 @@ void parsearPath( string path )
 			parsearPath( fileName );
 		}
 	}
+
+	delete lex;
 }
 
 int main( int argc, char *argv[] )
