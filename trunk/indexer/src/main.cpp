@@ -1,12 +1,12 @@
 #include <cstdlib>
-#include <cstring>
-#include <fstream>
+#include <string>
 #include <iostream>
 
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/param.h>
-#include "expat.h"
+
+#include "ParserWrapper.h"
 
 using namespace std;
 
@@ -14,49 +14,6 @@ static void usage()
 {
 	cerr <<	"usage: indexer [path]\n ex: indexer /home/me/html/\n";
 	::exit( 1 );
-}
-
-static void startElement(void *userData, const char *name, const char **atts)
-{
-  /*	printf("\n %s", name);
-  	while (*atts)
-	{
-    	printf(" %s='%s'", atts[0], atts[1]);
-    	atts += 2;
-  	}*/
-}
-
-static void charHandler(void *userData, const XML_Char *s, int len)
-{
-	string word = "";
-	// lexico miLexico = ( Lexico ) *userData;
- 	for ( int i = 0; i < len; i++)
-	{
-		if ( s[i] != ' ' )
-		{
-			word += s[i];
-		}
-		else
-		{
-			if ( word != "" )
-			{
-				cout << endl << word;
-				// lexico.addWord( word );
-				word = "";
-			}
-		}
-	}
-
-	if ( word != "" )
-	{
-		cout << endl << word;
-		word = "";
-	}
-}
-
-static void endElement(void *userData, const char *name)
-{
-	//printf("\n%s\n", name);
 }
 
 int selecc_arch( const struct dirent *entry )
@@ -73,7 +30,7 @@ void parsearPath( string path )
 	struct direct **files = NULL;
 	int selecc_arch( const struct dirent *entry );
 
-	cout << endl << endl << "Listando contenido de la carperta: " << path;
+	cout << endl << "Listando contenido de la carperta: " << path << endl;
     count = scandir ( path.c_str(), &files, selecc_arch, NULL);
 	if ( count <= 0 )
 	{
@@ -81,67 +38,47 @@ void parsearPath( string path )
 		exit(0);
 	}
 
-
+	ParserWrapper parser( NULL );
 	for ( i=0; i < count; ++i )
 	{
 		string fileName = path + "/" + files[i]->d_name;
-		cout << endl << "Examinando: " << fileName << " - ";
 
-		std::ifstream xmlFile( fileName.c_str() );
-		if ( ! xmlFile.is_open() )
+		// Me fijo si es una carpeta
+		bool isAFile = true;
+		 if( chdir( fileName.c_str() ) == 0 )
+			 isAFile = false;
+
+		cout << "Importando lexico desde " << fileName << ": ";
+		if ( isAFile )
 		{
-			std::cout << "No se pudo abrir el archivo";
+			try
+			{
+				parser.Parse( fileName );
+				std::cout << "Lexico importado con exito" << endl;
+			}
+			catch ( InvalidXmlException ex )
+			{
+				std::cout << "Archivo mal formado. Error: " << ex.what() << endl;
+			}
+			catch ( CantOpenFileException )
+			{
+				std::cout << "No se puede abrir el archivo" << endl;
+			}
 		}
 		else
 		{
-			XML_Parser parser = XML_ParserCreate( NULL );
-			XML_SetUserData( parser, NULL );
-			XML_SetElementHandler( parser, startElement, endElement );
-			XML_SetCharacterDataHandler( parser, charHandler );
-
-			std::string buffer;
-			bool done   = false;
-			bool failed = false;
-
-			std::getline( xmlFile, buffer );
-			if ( xmlFile.fail() )
-			{
-				// En caso de un archivo vacio, fallaria, hay que ver como determinar que algo es una carpeta
-				cout << " Entrando en subcarpeta: " << fileName;
-				parsearPath ( fileName );
-				failed = true;
-			}
-
-			while ( !done && !failed )
-			{
-				if ( ! XML_Parse(parser, buffer.c_str(), buffer.length(), done) )
-				{
-					std::cout << "El archivo no esta bien formado" ;
-					failed = true;
-					// std::cout << XML_ErrorString(XML_GetErrorCode(parser)) << " At line " << XML_GetCurrentLineNumber(parser);
-				}
-
-				std::getline(xmlFile, buffer);
-				done = xmlFile.fail();
-			}
-
-			XML_ParserFree(parser);
-
-			if ( !failed )
-				std::cout << "Lexico importado con exito";
+			cout << "Es un directorio, navegando hacia adentro..." << endl;
+			parsearPath( fileName );
 		}
 	}
 }
 
 int main( int argc, char *argv[] )
 {
-	if ( argc != 2 )
-		usage();
+	if ( argc != 2 ) usage();
 	string path( argv[1] );
-
 	parsearPath( path );
 
 	std::cout << endl;
-
  	return 0;
 }
