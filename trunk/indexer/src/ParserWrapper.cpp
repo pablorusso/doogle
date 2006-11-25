@@ -18,7 +18,8 @@ void ParserWrapper::startElement( void *userData, const char *name, const char *
 
 void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 {
-	// lexico miLexico = ( Lexico ) *userData;
+	Lexical* lex = ( Lexical* ) userData;
+
 	string word = "";
  	for ( int i = 0; i < len; i++)
 	{
@@ -30,7 +31,8 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 		{
 			if ( word != "" )
 			{
-				// lexico.addWord( word );
+				if ( lex != NULL )
+					lex->AddWord( word );
 				word = "";
 			}
 		}
@@ -38,7 +40,9 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 
 	if ( word != "" )
 	{
-		// lexico.addWord( word );
+		if ( lex != NULL )
+			lex->AddWord( word );
+
 		word = "";
 	}
 }
@@ -48,10 +52,9 @@ void ParserWrapper::endElement( void *userData, const char *name )
 	//printf("\n%s\n", name);
 }
 
-ParserWrapper::ParserWrapper( void *userData )
+ParserWrapper::ParserWrapper()
 {
 	_parser = XML_ParserCreate( NULL );
-	XML_SetUserData( _parser, userData );
 	XML_SetElementHandler( _parser, startElement, endElement );
 	XML_SetCharacterDataHandler( _parser, charHandler );
 }
@@ -77,8 +80,19 @@ void ParserWrapper::Parse( string fileName ) throw(InvalidXmlException, CantOpen
 	}
 }
 
+void ParserWrapper::SetLexical( Lexical* lexico )
+{
+	_lexico = lexico;
+	XML_SetUserData( _parser, _lexico );
+}
+
+Lexical* ParserWrapper::GetLexical()
+{
+	return _lexico;
+}
+
 ParserWrapper::~ParserWrapper()
 {
-	XML_ParserReset( _parser, NULL );
-	XML_ParserFree( _parser );
+	XML_ParserReset ( _parser, NULL );
+	XML_ParserFree  ( _parser );
 }

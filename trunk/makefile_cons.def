@@ -18,9 +18,10 @@ SOURCES  	:= $(notdir $(CPP_SRCS))
 OBJS     	:= $(addprefix ./$(OUTPUT), $(SOURCES:.cpp=.o) )
 
 ifneq ($(DEP_LIB_NAME), )
-	LIBS 		:= -l$(DEP_LIB_NAME)
-	DEP_LIB 	:= $(addprefix lib, $(DEP_LIB_NAME)).a
-	DEP_LIB_WS 	:= $(addprefix $(STAGE), $(DEP_LIB))
+	LIBS 		:= $(addprefix -l, $(DEP_LIB_NAME))
+	DEP_LIB 	:= $(addprefix lib, $(DEP_LIB_NAME))
+	DEP_LIB_A 	:= $(addsuffix .a, $(DEP_LIB))
+	DEP_LIB_WS 	:= $(addprefix $(STAGE), $(DEP_LIB_A))
 endif
 
 ifneq ($(DEP_INC), )
@@ -29,4 +30,4 @@ endif
 
 ifneq ($(SRC_TO_OUTPUT), )
 	SRC_TO_OUTPUT_W_PATH := $(addprefix $(SRC), $(SRC_TO_OUTPUT))
-endif 
+endif
