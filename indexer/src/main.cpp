@@ -39,10 +39,6 @@ void parsearPath( string path )
 		exit(0);
 	}
 
-	ParserWrapper parser;
-	Lexical *lex = new Lexical();
-	parser.SetLexical( lex );
-
 	for ( i=0; i < count; ++i )
 	{
 		string fileName = path + "/" + files[i]->d_name;
@@ -55,9 +51,13 @@ void parsearPath( string path )
 		cout << "Importando lexico desde " << fileName << ": ";
 		if ( isAFile )
 		{
+			Lexical *lex = new Lexical();
+
 			try
 			{
-				parser.Parse( fileName );
+				ParserWrapper parser ( fileName, lex );
+				parser.Parse();
+
 				std::cout << "Lexico importado con exito" << endl;
 			}
 			catch ( InvalidXmlException ex )
@@ -68,6 +68,8 @@ void parsearPath( string path )
 			{
 				std::cout << "No se puede abrir el archivo" << endl;
 			}
+
+			delete lex;
 		}
 		else
 		{
@@ -75,8 +77,6 @@ void parsearPath( string path )
 			parsearPath( fileName );
 		}
 	}
-
-	delete lex;
 }
 
 int main( int argc, char *argv[] )

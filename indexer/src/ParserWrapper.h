@@ -12,20 +12,17 @@ using namespace std;
 class ParserWrapper
 {
 	private:
+		ifstream *_xmlFile;
 		XML_Parser _parser;
-		Lexical *_lexico;
 
 		static void endElement   ( void *userData, const char *name );
 		static void charHandler  ( void *userData, const XML_Char *s, int len );
 		static void startElement ( void *userData, const char *name, const char **atts );
 
 	public:
-		ParserWrapper();
-		void Parse( string fileName ) throw(InvalidXmlException, CantOpenFileException);
+		ParserWrapper( string fileName, Lexical* lexico );
+		void Parse() throw(InvalidXmlException, CantOpenFileException);
 		~ParserWrapper();
-
-		void SetLexical( Lexical* lexico );
-		Lexical* GetLexical();
 };
 
 #endif
