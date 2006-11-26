@@ -20,7 +20,7 @@ class ParserWrapper
 		static void startElement ( void *userData, const char *name, const char **atts );
 
 	public:
-		ParserWrapper( string fileName, Lexical* lexico );
+		ParserWrapper( string fileName, Lexical &lexico );
 		void Parse() throw(InvalidXmlException, CantOpenFileException);
 		~ParserWrapper();
 };

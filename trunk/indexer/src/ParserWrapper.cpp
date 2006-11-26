@@ -52,12 +52,12 @@ void ParserWrapper::endElement( void *userData, const char *name )
 	//printf("\n%s\n", name);
 }
 
-ParserWrapper::ParserWrapper( string fileName, Lexical* lexico )
+ParserWrapper::ParserWrapper( string fileName, Lexical &lexico )
 {
 	_parser = XML_ParserCreate( NULL );
 	XML_SetElementHandler( _parser, startElement, endElement );
 	XML_SetCharacterDataHandler( _parser, charHandler );
-	XML_SetUserData( _parser, lexico );
+	XML_SetUserData( _parser, &lexico );
 
 	_xmlFile = new ifstream( fileName.c_str() );
 	if ( ! _xmlFile->is_open() )
