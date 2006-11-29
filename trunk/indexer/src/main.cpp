@@ -116,8 +116,6 @@ void buildLeaders( DocumentLexical &docLex, int docCount )
 	DocumentLexical followers("followers.dat");
 	DocumentLexical withoutLeader("noleader.dat");
 
-	DocumentRelation leadFollower("leaderFollowerRelation.dat");
-
 	docLex.StartRead();
 	// El primero siempre es lider (porque vienen ordenados por cantidad de lexico distinto)
 	if ( DocumentLexicalData item = docLex.Read() )
@@ -149,8 +147,6 @@ void buildLeaders( DocumentLexical &docLex, int docCount )
 				leader.SetFollowersQuantity( leader.GetFollowersQuantity() + 1 );
 				leaders.updateRecord( leader );
 
-				DocumentRelationData relData ( leader.GetId(), item.GetId() );
-				leadFollower.AddRecord( relData );
 				isFollower = true;
 			}
 			else
@@ -175,9 +171,6 @@ void buildLeaders( DocumentLexical &docLex, int docCount )
 				followers.AddRecord( item );
 				bestLeader.SetFollowersQuantity( bestLeader.GetFollowersQuantity() + 1 );
 				leaders.updateRecord( bestLeader );
-
-				DocumentRelationData relData ( bestLeader.GetId(), item.GetId() );
-				leadFollower.AddRecord( relData );
 			}
 			else
 			{
