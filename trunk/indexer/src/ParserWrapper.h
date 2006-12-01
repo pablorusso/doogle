@@ -2,7 +2,7 @@
 #define __PARSER_WRAPPER__
 
 #include <string>
-#include "Lexical.h"
+#include "ArchivoLexico.h"
 #include "expat.h"
 #include "InvalidXmlException.h"
 #include "CantOpenFileException.h"
@@ -20,7 +20,7 @@ class ParserWrapper
 		static void startElement ( void *userData, const char *name, const char **atts );
 
 	public:
-		ParserWrapper( string fileName, Lexical &lexico );
+		ParserWrapper( string fileName, ArchivoLexico &lexico );
 		void Parse() throw(InvalidXmlException, CantOpenFileException);
 		~ParserWrapper();
 };

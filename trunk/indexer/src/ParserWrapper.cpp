@@ -4,6 +4,9 @@
 #include <fstream>
 #include <iostream>
 
+#include "ArchivoLexico.h"
+#include "LexicoData.h"
+
 void ParserWrapper::startElement( void *userData, const char *name, const char **atts )
 {
   	/*
@@ -18,7 +21,7 @@ void ParserWrapper::startElement( void *userData, const char *name, const char *
 
 void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 {
-	Lexical* lex = ( Lexical* ) userData;
+	ArchivoLexico* lex = ( ArchivoLexico* ) userData;
 
 	string word = "";
  	for ( int i = 0; i < len; i++)
@@ -32,7 +35,11 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 			if ( word != "" )
 			{
 				if ( lex != NULL )
-					lex->AddWord( word );
+				{
+					LexicalData data;
+					data.termino = word;
+					lex->escribir( data );
+				}
 				word = "";
 			}
 		}
@@ -41,7 +48,11 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 	if ( word != "" )
 	{
 		if ( lex != NULL )
-			lex->AddWord( word );
+		{
+			LexicalData data;
+			data.termino = word;
+			lex->escribir( data );
+		}
 
 		word = "";
 	}
@@ -52,7 +63,7 @@ void ParserWrapper::endElement( void *userData, const char *name )
 	//printf("\n%s\n", name);
 }
 
-ParserWrapper::ParserWrapper( string fileName, Lexical &lexico )
+ParserWrapper::ParserWrapper( string fileName, ArchivoLexico &lexico )
 {
 	_parser = XML_ParserCreate( NULL );
 	XML_SetElementHandler( _parser, startElement, endElement );
