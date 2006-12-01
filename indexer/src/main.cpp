@@ -7,7 +7,10 @@
 #include <sys/param.h>
 
 #include "ParserWrapper.h"
-#include "Lexical.h"
+
+// Archivos
+#include "ArchivoLexico.h"
+#include "LexicoData.h"
 
 // hay que parametrizarla bien
 #define DELTA_EQUAL 0.2
@@ -185,7 +188,7 @@ void buildLeaders( DocumentLexical &docLex, int docCount )
 	}
 }
 
-void buildLexical( string path, Lexical &lexical, Document &doc, DocumentLexical &docLex )
+void buildLexical( string path, ArchivoLexico &lexical, Document &doc, DocumentLexical &docLex )
 {
 	int count, i;
 	struct direct **files = NULL;
@@ -215,7 +218,7 @@ void buildLexical( string path, Lexical &lexical, Document &doc, DocumentLexical
 			DocumentData docData( fileName );
 			doc.AddRecord( docData );
 
-			Lexical lex( "lexicalPartition.dat" );
+			ArchivoLexico lex( "lexicalPartition.dat", ESCRIBIR );
 			try
 			{
 				ParserWrapper parser ( fileName, lex );
@@ -253,7 +256,7 @@ int main( int argc, char *argv[] )
 	if ( argc != 2 ) usage();
 	string path( argv[1] );
 
-	Lexical 		lexical( "lexical.dat" );
+	ArchivoLexico	lexical( "lexical.dat", ESCRIBIR | LEER );
 	Document 		doc( "documents.dat" );
 	DocumentLexical docLex( "documentLexicalTmp.dat" );
 
