@@ -7,18 +7,6 @@
 #include "ArchivoLexico.h"
 #include "LexicoData.h"
 
-void ParserWrapper::startElement( void *userData, const char *name, const char **atts )
-{
-  	/*
-	printf("\n %s", name);
-  	while (*atts)
-	{
-    	printf(" %s='%s'", atts[0], atts[1]);
-    	atts += 2;
-  	}
-	*/
-}
-
 void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 {
 	ArchivoLexico* lex = ( ArchivoLexico* ) userData;
@@ -58,24 +46,18 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 	}
 }
 
-void ParserWrapper::endElement( void *userData, const char *name )
-{
-	//printf("\n%s\n", name);
-}
-
 ParserWrapper::ParserWrapper( string fileName, ArchivoLexico &lexico )
 {
 	_parser = XML_ParserCreate( NULL );
-	XML_SetElementHandler( _parser, startElement, endElement );
 	XML_SetCharacterDataHandler( _parser, charHandler );
 	XML_SetUserData( _parser, &lexico );
 
 	_xmlFile = new ifstream( fileName.c_str() );
 	if ( ! _xmlFile->is_open() )
-		throw CantOpenFileException( fileName );
+		throw string( "No se pudo abrir el archivo " + fileName );
 }
 
-void ParserWrapper::Parse() throw(InvalidXmlException, CantOpenFileException)
+void ParserWrapper::Parse()
 {
 	std::string buffer;
 	std::getline( *_xmlFile, buffer );
@@ -84,7 +66,7 @@ void ParserWrapper::Parse() throw(InvalidXmlException, CantOpenFileException)
 	while ( !done )
 	{
 		if ( ! XML_Parse( _parser, buffer.c_str(), buffer.length(), done ) )
-			throw InvalidXmlException( XML_ErrorString( XML_GetErrorCode( _parser ) ), XML_GetCurrentLineNumber( _parser ) );
+			throw string( XML_ErrorString( XML_GetErrorCode( _parser ) ) + " en la linea " + XML_GetCurrentLineNumber( _parser ) );
 
 		std::getline( *_xmlFile, buffer );
 		done = _xmlFile->fail();
