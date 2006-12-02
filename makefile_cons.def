@@ -21,7 +21,10 @@ ifneq ($(DEP_LIB_NAME), )
 	LIBS 		:= $(addprefix -l, $(DEP_LIB_NAME))
 	DEP_LIB 	:= $(addprefix lib, $(DEP_LIB_NAME))
 	DEP_LIB_A 	:= $(addsuffix .a, $(DEP_LIB))
-	DEP_LIB_WS 	:= $(addprefix $(STAGE), $(DEP_LIB_A))
+	
+	DEP_LIB_STAGE_P	     := $(addprefix lib, $(DEP_LIB_STAGE))
+	DEP_FROM_STAGE_LIB_A := $(addsuffix .a, $(DEP_LIB_STAGE_P))
+	DEP_LIB_WS 	     := $(addprefix $(STAGE), $(DEP_FROM_STAGE_LIB_A))
 endif
 
 ifneq ($(DEP_INC), )
