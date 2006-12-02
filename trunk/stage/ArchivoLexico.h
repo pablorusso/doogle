@@ -3,10 +3,8 @@
 
 #include <fstream>
 #include <string>
+#include "ArchivoConsts.h"
 #include "LexicoData.h"
-
-#define LEER 1
-#define ESCRIBIR 2
 
 class ArchivoLexico
 {
@@ -23,21 +21,15 @@ class ArchivoLexico
 		void escribirImpl( const LexicoData data );
 		void leerImpl( LexicoData& data );
 	public:
-		//CONSTRUCTORES
         ArchivoLexico( std::string nombre, int modo );
 
-        //METODOS - FUNCIONALIDAD
 		void comenzarLectura();
-
 		void leerPosicion( int posicion, LexicoData &data );
 		bool leer( LexicoData &data );
-
 		void escribirPosicion( int posicion, const LexicoData data );
 		void escribir( const LexicoData data );
-
         bool fin();
 
-        //DESTRUCTOR
         ~ArchivoLexico();
 };
 

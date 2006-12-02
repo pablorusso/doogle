@@ -1,5 +1,5 @@
-#ifndef __ARCHIVOLEXICODATA_H__
-#define __ARCHIVOLEXICODATA_H__
+#ifndef __LEXICODATA_H__
+#define __LEXICODATA_H__
 
 #include <string>
 

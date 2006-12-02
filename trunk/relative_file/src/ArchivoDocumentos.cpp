@@ -32,54 +32,31 @@ ArchivoDocumentos::ArchivoDocumentos( std::string nombre, int modo )
 	if ( ( modo & ESCRIBIR ) == ESCRIBIR )
 		modeToUse |= ios::out;
 
-	//Inicializo el flujo de entrada/salida
     _fstream.open( nombre.c_str(), modeToUse  );
-
-    //Se verifica si el archivo abre correctamente, sino lo crea.
     if ( !_fstream.is_open() )
 	{
-		/* limpia los flags de control de estado del archivo */
        	_fstream.clear();
-
-       /* crea el archivo */
        _fstream.open( nombre.c_str(), ios::out | ios::binary );
        _fstream.close();
-
-       /* Se reabre el archivo para lectura/escritura binario */
        _fstream.open( nombre.c_str(), modeToUse );
-
-       /* Se verifica la creacion del archivo */
        if ( !_fstream.is_open() )
           throw string("El archivo no pudo ser abierto");
 	}
 
-
-	//---------------------------------------------------------
-	//Inicializo el flujo de entrada/salida
 	string nombreIdx = "I_" + nombre;
     _fstreamIdx.open( nombreIdx.c_str(), modeToUse  );
-
-    //Se verifica si el archivo abre correctamente, sino lo crea.
     if ( !_fstreamIdx.is_open() )
 	{
-		/* limpia los flags de control de estado del archivo */
        	_fstreamIdx.clear();
-
-       /* crea el archivo */
        _fstreamIdx.open( nombreIdx.c_str(), ios::out | ios::binary );
        _fstreamIdx.close();
-
-       /* Se reabre el archivo para lectura/escritura binario */
        _fstream.open( nombreIdx.c_str(), modeToUse );
-
-       /* Se verifica la creacion del archivo */
        if ( !_fstreamIdx.is_open() )
           throw string("El archivo no pudo ser abierto");
 	}
 
     _fstreamIdx.seekg( 0, ios::end );
 	_cantRegistros = _fstreamIdx.tellg() / _tamanio;
-
 }
 
 //METODOS-FUNCIONALIDAD
@@ -94,13 +71,14 @@ void ArchivoDocumentos::comenzarLectura()
 {
 	validarModo( LEER );
 	_posicionSecuencial = 0;
+	_fstreamIdx.seekg( _posicionSecuencial );
 }
 
 void ArchivoDocumentos::escribirImpl( DocumentData data )
 {
 	int newId = _cantRegistros+1;
-
 	long offset = _fstream.tellp();
+
 	void *buffer = malloc( _tamanio );
 	IdocumentFileReg *datoNuevo = static_cast<IdocumentFileReg *> ( buffer );
 	datoNuevo->id = _cantRegistros+1;
@@ -109,11 +87,13 @@ void ArchivoDocumentos::escribirImpl( DocumentData data )
 	_cantRegistros++;
 	delete datoNuevo;
 
-  	string      ruta;
+  	string ruta;
 
+	// id
 	void *temp = &newId;
 	_fstream.write( static_cast<char*>( temp ), sizeof(int) );
 
+	// ruta
 	char c;
 	for(unsigned i=0; i < data.ruta.length(); i++ )
 	{
@@ -121,10 +101,17 @@ void ArchivoDocumentos::escribirImpl( DocumentData data )
 		temp = &c;
 		_fstream.write( static_cast<char*>( temp ), sizeof(char) );
 	}
-	c = '\0';
 
+	// barra cero
+	c = '\0';
+	temp = &c;
+	_fstream.write( static_cast<char*>( temp ), sizeof(char) );
+
+	// norma
 	temp = &data.norma;
 	_fstream.write( static_cast<char*>( temp ), sizeof( double ) );
+
+	// cantTermDistintos
 	temp = &data.cantTermDistintos;
 	_fstream.write( static_cast<char*>( temp ), sizeof( long ) );
 }
@@ -152,15 +139,16 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 	_fstream.read( static_cast<char*>( temp ), sizeof(int) );
 	temp = &c;
 	_fstream.read( static_cast<char*>( temp ), sizeof(char) );
-	  while( c != '\0' ){
-		   ruta += c;
-		   _fstream.read( static_cast<char*>( temp ), sizeof(char) );
-	  }
+	while( c != '\0' )
+	{
+		ruta += c;
+		_fstream.read( static_cast<char*>( temp ), sizeof(char) );
+	}
 
-	  temp = &norma;
-	 _fstream.read( static_cast<char*>( temp ), sizeof( double ) );
-	  temp = &cantTerm;
-	 _fstream.read( static_cast<char*>( temp ), sizeof( long ) );
+	temp = &norma;
+	_fstream.read( static_cast<char*>( temp ), sizeof( double ) );
+	temp = &cantTerm;
+	_fstream.read( static_cast<char*>( temp ), sizeof( long ) );
 
 	data.id    = id;
 	data.ruta  = ruta;
@@ -178,7 +166,6 @@ void ArchivoDocumentos::escribirPosicion( int posicion, DocumentData data )
 void ArchivoDocumentos::leerPosicion( int posicion, DocumentData& data )
 {
 	validarModo( LEER );
-
 	_fstreamIdx.seekg ( posicionLogicaAReal( posicion ), ios::beg );
 	leerImpl( data );
 }
@@ -207,18 +194,12 @@ bool ArchivoDocumentos::leer( DocumentData& data )
 	leerImpl( data );
 
 	_posicionSecuencial = _fstreamIdx.tellg();
-	bool esEof = _fstreamIdx.peek() == char_traits<char>::eof();
-	return esEof;
+	return this->fin();
 }
 
 bool ArchivoDocumentos::fin()
 {
-	/* para comprobar el fin lee un char del buffer, sin retirarlo y lo compara con el fin de archivo */
 	bool esEof = ( _fstreamIdx.peek() == char_traits<char>::eof() );
-	/*
-	if ( esEof )
-    	_fstream.clear();
-	*/
   	return esEof;
 }
 
@@ -227,5 +208,3 @@ ArchivoDocumentos::~ArchivoDocumentos()
 	_fstream.close();
 	_fstreamIdx.close();
 }
-
-
