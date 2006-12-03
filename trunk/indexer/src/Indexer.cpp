@@ -1,11 +1,14 @@
 #include "Indexer.h"
 #include <math.h>
 #include <vector>
+#include <map>
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
+
+#include "MathIndex.h"
 
 struct CantTermsComparer
 {
@@ -48,6 +51,30 @@ string Indexer::lexicalFileName()
 {
 	return _targetFolder + "lexico.dat";
 }
+string Indexer::leaderFileName()
+{
+	return _targetFolder + "leaders.dat";
+}
+string Indexer::leaderIdxFileName()
+{
+	return _targetFolder + "I_leaders.dat";
+}
+string Indexer::followersFileName()
+{
+	return _targetFolder + "followers.dat";
+}
+string Indexer::followersIdxFileName()
+{
+	return _targetFolder + "I_followers.dat";
+}
+string Indexer::noLeaderFileName()
+{
+	return _targetFolder + "noLeader.dat";
+}
+string Indexer::noLeaderIdxFileName()
+{
+	return _targetFolder + "I_noLeader.dat";
+}
 
 float Indexer::deltaCosineForEqual()
 {
@@ -63,65 +90,46 @@ int Indexer::fileFilter( const struct dirent *entry )
 		return -1;
 }
 
-double Indexer::calcularNorma( LexicalPair &items, long &cantTerminos )
+void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 {
-	long pesoTotal = 0;
-	cantTerminos = 0;
-	LexicalPair::iterator curr = items.begin();
-	while ( curr != items.end() )
-	{
-		long peso = static_cast< long >( curr->second );
-		pesoTotal += peso * peso;
-		cantTerminos++;
+	long docCount = _document->size();
+	DocLexicoData data;
 
-		++curr;
-	}
-
-	return sqrt( pesoTotal );
-}
-
-void Indexer::buildLeaders()
-{
-	/*
 	// ver como se calcula esto
-	int maxLeaders   = docCount / 2;
-	int maxFollowers = docCount / 2;
+	uint maxLeaders   = sqrt( docCount );
+	uint maxFollowers = sqrt( docCount );
 
-	DocumentLexical leaders("leaders.dat");
-	DocumentLexical followers("followers.dat");
-	DocumentLexical withoutLeader("noleader.dat");
+	map< int, DocLexicoData > leaders;
 
-	docLex.StartRead();
-	// El primero siempre es lider (porque vienen ordenados por cantidad de lexico distinto)
-	if ( DocLexicoData item = docLex.Read() )
-		learders.AddRecord( item );
+	ArchivoDocLexico *followers     = new ArchivoDocLexico( followersFileName(), followersIdxFileName(), ESCRIBIR | LEER );
+	ArchivoDocLexico *withoutLeader = new ArchivoDocLexico( noLeaderFileName(), noLeaderIdxFileName(), ESCRIBIR | LEER );
+
+	docLex->comenzarLectura();
+	docLex->leer( data );
+	if ( !docLex->fin() )
+		leaders[ data.id ] = data;
 
 	// Para cada documento
-	while ( DocLexicoData item = docLex.Read() )
+	docLex->leer( data );
+	while ( !docLex->fin() )
 	{
-		DocLexicoData bestLeader = NULL;
-		bool isFollower = false;
-		float lessRank  = 0;
+		bool isFollower = false; float lessRank  = 0;
+		int bestLeaderId = -1;
 
-
-		leaders.StartRead();
-		// Para cada lider
-		while ( DocLexicoData leader = leaders.Read() && ! isFollower )
+		map< int, DocLexicoData >::iterator curr = leaders.begin();
+		while ( curr != leaders.end() && ! isFollower )
 		{
-			// Comparo usando el ranking del coseno el documento con cada lider
-			LexicalPair []leaderPairList = leader.GetLexicalPairList();
-			LexicalPair []itemPairList   = item.GetLexicalPairList();
-			float rank = cosineRank( itemPairList, item.GetNorm(), item.GetLexicalPairCount(), leaderPairList, leader.GetNorm(), leader.GetLexicalPairCount() );
+			DocLexicoData itemLeader = static_cast< DocLexicoData >( curr->second );
 
-			if ( rank <= DELTA_EQUAL )
+			// Comparo usando el ranking del coseno el documento con cada lider
+			double rank = MathIndex::cosineRank( itemLeader.terminos, data.terminos, MathIndex::norm( itemLeader.terminos ), MathIndex::norm( data.terminos ) );
+			if ( rank <= deltaCosineForEqual() )
 			{
 				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
-				item.SetLeader( leader.GetId() );
-				followers.AddRecord( item );
+				followers->escribir( data );
 
-				leader.SetFollowersQuantity( leader.GetFollowersQuantity() + 1 );
-				leaders.updateRecord( leader );
-
+				long offset = followers->ultimaPosicionEscrita();
+				itemLeader.seguidores[ data.id ] = offset;
 				isFollower = true;
 			}
 			else
@@ -130,35 +138,51 @@ void Indexer::buildLeaders()
 				if ( rank < lessRank )
 				{
 					lessRank = rank;
-					bestLeader = leader;
+					bestLeaderId = itemLeader.id;
 				}
 			}
+
+			++curr;
 		}
+
 
 		if ( ! isFollower )
 		{
+			DocLexicoData bestLeader = static_cast< DocLexicoData > ( leaders[ bestLeaderId ] );
 			// Si no es seguidor natural de nadie
-
-			if ( bestLeader.GetFollowersQuantity < maxFollowers )
+			if ( bestLeader.seguidores.size() < maxFollowers )
 			{
-				// Si el leader mas cercano todavia acepta seguidores, entonces lo hago seguidor de este
-				item.SetLeader( bestLeader.GetId() );
-				followers.AddRecord( item );
-				bestLeader.SetFollowersQuantity( bestLeader.GetFollowersQuantity() + 1 );
-				leaders.updateRecord( bestLeader );
+				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
+				followers->escribir( data );
+
+				long offset = followers->ultimaPosicionEscrita();
+				bestLeader.seguidores[ data.id ] = offset;
 			}
 			else
 			{
-				if ( leaders.GetCount() < maxLeaders )
+				if ( leaders.size() < maxLeaders )
 					// Si aun tengo espacio para liders, lo hago lider
-					leaders.AddRecord( item );
+					leaders[ data.id ] = data;
 				else
 					// Si no puede ser ni seguidor ni lider, entonces no encaja con nada y lo mando al otro archivo
-					withoutLeader.AddRecord( item );
+					withoutLeader->escribir( data );
 			}
 		}
 	}
-	*/
+
+	delete followers;
+	delete withoutLeader;
+
+	// Paso a disco los lideres que tenia en memoria ordenados por id
+	ArchivoDocLexico *aLeaders = new ArchivoDocLexico( leaderFileName(), leaderIdxFileName(), ESCRIBIR | LEER );
+	map< int, DocLexicoData >::iterator curr = leaders.begin();
+	while ( curr != leaders.end() )
+	{
+		DocLexicoData itemLeader = static_cast< DocLexicoData >( curr->second );
+		aLeaders->escribir( itemLeader );
+		++curr;
+	}
+	delete aLeaders;
 }
 
 void Indexer::sortByQuantity()
@@ -322,7 +346,7 @@ void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
 				// GRABO EL DOCUMENTO
 				DocumentData docData;
 				docData.ruta = fileName;
-				docData.norma = calcularNorma( docLexData.terminos, docData.cantTermDistintos );
+				docData.norma = MathIndex::norm( docLexData.terminos, docData.cantTermDistintos );
 				int newDocId = _document->escribir( docData );
 
 				// GRABO LA ASOCIACION DOCUMENTO-TERMINOS
@@ -341,15 +365,17 @@ void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
 	}
 }
 
-void Indexer::buildIndex( string path )
+void Indexer::buildIndex( string fromPath )
 {
 	ArchivoDocLexico *documentLexico = new ArchivoDocLexico  ( Indexer::docLexFileName(), Indexer::docLexIdxFileName(), ESCRIBIR | LEER );
-	buildLexical( path, documentLexico );
+	buildLexical( fromPath, documentLexico );
 	delete documentLexico;
 
 	sortByQuantity();
 
-	buildLeaders();
+	documentLexico = new ArchivoDocLexico  ( Indexer::docLexFileName(), Indexer::docLexIdxFileName(), ESCRIBIR | LEER );
+	buildLeaders( documentLexico );
+	delete documentLexico;
 }
 
 

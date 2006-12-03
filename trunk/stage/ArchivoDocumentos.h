@@ -33,6 +33,8 @@ class ArchivoDocumentos
 		int  escribir( const DocumentData data );
         bool fin();
 
+		long size();
+
         ~ArchivoDocumentos();
 };
 

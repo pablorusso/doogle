@@ -84,6 +84,7 @@ int ArchivoDocLexico::escribirImpl( DocLexicoData data )
 {
 	int newId = data.id <= 0 ? _cantRegistros+1 : data.id;
 	long offset = _fstream.tellp();
+	_lastWrite = offset;
 
 	// id
 	void *temp = &newId;
@@ -183,6 +184,11 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 		data.seguidores[ idDoc ] = offset_seg;
 		cantSeguidores--;
 	}
+}
+
+long ArchivoDocLexico::ultimaPosicionEscrita()
+{
+	return _lastWrite;
 }
 
 int ArchivoDocLexico::escribirPosicion( int posicion, DocLexicoData data )
