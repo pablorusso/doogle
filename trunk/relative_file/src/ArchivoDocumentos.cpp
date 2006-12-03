@@ -19,9 +19,10 @@ void ArchivoDocumentos::validarModo( int modoBuscado )
 }
 
 //COSNTRUCTORES
-ArchivoDocumentos::ArchivoDocumentos( std::string nombre, int modo )
+ArchivoDocumentos::ArchivoDocumentos( std::string nombre, std::string nombreIdx, int modo )
 {
 	_nombre = nombre;
+	_nombreIdx = nombreIdx;
 	_modo = modo;
 	_tamanio = sizeof( IdocumentFileReg );
 	_posicionSecuencial = 0;
@@ -35,24 +36,23 @@ ArchivoDocumentos::ArchivoDocumentos( std::string nombre, int modo )
     _fstream.open( nombre.c_str(), modeToUse  );
     if ( !_fstream.is_open() )
 	{
-       	_fstream.clear();
+       _fstream.clear();
        _fstream.open( nombre.c_str(), ios::out | ios::binary );
        _fstream.close();
        _fstream.open( nombre.c_str(), modeToUse );
        if ( !_fstream.is_open() )
-          throw string("El archivo no pudo ser abierto");
+          throw string("El archivo " + nombre + " no pudo ser abierto");
 	}
 
-	string nombreIdx = "I_" + nombre;
     _fstreamIdx.open( nombreIdx.c_str(), modeToUse  );
     if ( !_fstreamIdx.is_open() )
 	{
-       	_fstreamIdx.clear();
+       _fstreamIdx.clear();
        _fstreamIdx.open( nombreIdx.c_str(), ios::out | ios::binary );
        _fstreamIdx.close();
-       _fstream.open( nombreIdx.c_str(), modeToUse );
+       _fstreamIdx.open( nombreIdx.c_str(), modeToUse );
        if ( !_fstreamIdx.is_open() )
-          throw string("El archivo no pudo ser abierto");
+          throw string("El archivo " + nombreIdx + " no pudo ser abierto");
 	}
 
     _fstreamIdx.seekg( 0, ios::end );

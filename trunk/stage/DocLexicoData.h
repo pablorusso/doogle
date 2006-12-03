@@ -3,11 +3,10 @@
 
 #include <string>
 #include <map>
+#include "LexicoData.h"
 
 using namespace std;
 
-// id - peso
-typedef map<int, long> LexicalPair;
 // id - offset
 typedef map<int, long> Seguidores;
 

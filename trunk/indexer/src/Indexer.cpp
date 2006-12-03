@@ -1,13 +1,46 @@
 #include "Indexer.h"
+#include <math.h>
 
-Indexer::Indexer()
+Indexer::Indexer( string targetFolder )
 {
-	_lexical  = new ArchivoLexico( "lexical.dat", ESCRIBIR | LEER );
-	_document = new ArchivoDocumentos( "documents.dat" );
-	_docLex   = new ArchivoDocLexico( "documentLexicalTmp.dat" );
+	_targetFolder = targetFolder;
 
+	remove( documentsFileName().c_str() );
+	remove( documentsIdxFileName().c_str() );
+	remove( docLexFileName().c_str() );
+	remove( docLexIdxFileName().c_str() );
+	remove( lexicalFileName().c_str() );
+
+	_document       = new ArchivoDocumentos ( Indexer::documentsFileName(), Indexer::documentsIdxFileName(), ESCRIBIR | LEER );
+	_documentLexico = new ArchivoDocLexico  ( Indexer::docLexFileName(), Indexer::docLexIdxFileName(), ESCRIBIR | LEER );
+}
+
+string Indexer::documentsFileName()
+{
+	return _targetFolder + "documentos.dat";
+}
+string Indexer::documentsIdxFileName()
+{
+	return _targetFolder + "I_documentos.dat";
+}
+string Indexer::docLexFileName()
+{
+	return _targetFolder + "documentoLexico.dat";
+}
+string Indexer::docLexIdxFileName()
+{
+	return _targetFolder + "I_documentoLexico.dat";
+}
+
+string Indexer::lexicalFileName()
+{
+	return _targetFolder + "lexico.dat";
+}
+
+float Indexer::deltaCosineForEqual()
+{
 	// TODO: Parametrizar empiricamente...
-	DeltaCosineForEqual = 0.2;
+	return 0.2;
 }
 
 int Indexer::fileFilter( const struct dirent *entry )
@@ -18,8 +51,26 @@ int Indexer::fileFilter( const struct dirent *entry )
 		return -1;
 }
 
+double Indexer::calcularNorma( LexicalPair &items, long &cantTerminos )
+{
+	long pesoTotal = 0;
+	cantTerminos = 0;
+	LexicalPair::iterator curr = items.begin();
+	while ( curr != items.end() )
+	{
+		long peso = static_cast< long >( curr->second );
+		pesoTotal += peso * peso;
+		cantTerminos++;
+
+		++curr;
+	}
+
+	return sqrt( pesoTotal );
+}
+
 void Indexer::buildLeaders()
 {
+	/*
 	// ver como se calcula esto
 	int maxLeaders   = docCount / 2;
 	int maxFollowers = docCount / 2;
@@ -95,23 +146,18 @@ void Indexer::buildLeaders()
 			}
 		}
 	}
+	*/
 }
 
 void Indexer::buildLexical( string path )
 {
 	int count, i;
 	struct direct **files = NULL;
-	int fileFilter( const struct dirent *entry );
 
-	cout << endl << "Listando contenido de la carperta: " << path << endl;
-    count = scandir ( path.c_str(), &files, fileFilter, NULL);
+    count = scandir ( path.c_str(), &files, Indexer::fileFilter, NULL);
 	if ( count <= 0 )
-	{
-		cout << "No hay archivos en la carpeta";
-		exit(0);
-	}
+		return ;
 
-	ArchivoDocLexico docLex( "documentLexicalTmp.dat", ESCRIBIR );
 	for ( i=0; i < count; ++i )
 	{
 		string fileName = path + "/" + files[i]->d_name;
@@ -121,57 +167,60 @@ void Indexer::buildLexical( string path )
 		 if( chdir( fileName.c_str() ) == 0 )
 			 isAFile = false;
 
-		cout << "Importando lexico desde " << fileName << ": ";
 		if ( isAFile )
 		{
-			DocumentData docData( fileName );
-			/*
-			docData
-			std::string ruta;
-        	double      norma;
-        	long        cantTermDistintos;
-			*/
-
-			ArchivoLexico lex( "lexicalPartition.dat", ESCRIBIR );
 			try
 			{
-				ParserWrapper parser ( fileName, lex );
+				WordPair wordsFound;
+				ParserWrapper parser( fileName, &wordsFound );
 				parser.Parse();
 
-				std::cout << "Lexico importado con exito" << endl;
-			}
-			catch ( std::string ex )
-			{
-				std::cout << ex << endl;
-			}
+				// GRABO EL LEXICO
+				string tempLex = _targetFolder + "lexicoTemp.dat";
+				// Paso los terminos nuevos al lexico
+				LexicalPair mergedItems;
+				ArchivoLexico *lexical = new ArchivoLexico( Indexer::lexicalFileName(), ESCRIBIR | LEER );
+				lexical->mergeWith( tempLex, wordsFound, mergedItems );
+				delete lexical;
+				// borro el lexico viejo y renombro el nuevo como el original
+				remove ( Indexer::lexicalFileName().c_str() );
+				rename ( tempLex.c_str(), Indexer::lexicalFileName().c_str() );
 
-			LexicalPair []mergedItems = lexical.MergeWith( lex );
 
-			int count = lex->GetCount();
-			DocumentLexicalData docLexData( docData.GetId(), count );
-			/*
-			// id - peso typedef map<int, long> LexicalPair;
-			// id - offset typedef map<int, long> Seguidores;
-			class DocLexicoData
+				// GRABO EL DOCUMENTO
+				DocumentData docData;
+				docData.ruta = fileName;
+				docData.norma = calcularNorma( mergedItems, docData.cantTermDistintos );
+				_document->escribir( docData );
+
+				// TODO: Tengo que asociar el documento con lo terminos
+				/*
+				DocumentLexicalData docLexData;
+				// Seguidores  seguidores; LexicalPair terminos;
+				// id - peso typedef map<int, long> LexicalPair;
+				// id - offset typedef map<int, long> Seguidores;
+				int count = lex->GetCount();
+				DocumentLexicalData docLexData( docData.GetId(), count );
+				for( int i = 0; i < count; ++i )
+					docLexData.AddLexicalPair( mergedItems[i] );
+				docLex.AbuildLexicalddRecord( docLexData );
+				*/
+
+				// delete wordsFound;
+			}
+			catch ( string ex )
 			{
-				public:
-					int  id;
-					Seguidores  seguidores;
-					LexicalPair terminos;
-			};
-			*/
-			for( int i = 0; i < count; ++i )
-				docLexData.AddLexicalPair( mergedItems[i] );
-			docLex.AddRecord( docLexData );
+				cout << ex << endl;
+			}
 		}
 		else
 		{
-			cout << "Es un directorio, navegando hacia adentro..." << endl;
-			parsearPath( fileName );
+			buildLexical( fileName );
 		}
 	}
 
-	docLex.sortByQuantity();
+	// Tengo que ordenar por cantidad de terminos distintos
+	// docLex.sortByQuantity();
 }
 
 void Indexer::buildIndex( string path )
@@ -182,7 +231,6 @@ void Indexer::buildIndex( string path )
 
 Indexer::~Indexer()
 {
-	delete _lexical;
 	delete _document;
-	delete _docLex;
+	delete _documentLexico;
 }

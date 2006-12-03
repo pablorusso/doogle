@@ -13,6 +13,7 @@ class ArchivoDocLexico
 		std::fstream  _fstreamIdx;
 
         std::string   _nombre;
+		std::string   _nombreIdx;
 		int			  _modo;
 		long 		  _posicionSecuencial;
 		long		  _tamanio;
@@ -23,7 +24,7 @@ class ArchivoDocLexico
 		void escribirImpl( const DocLexicoData data );
 		void leerImpl( DocLexicoData& data );
 	public:
-        ArchivoDocLexico( std::string nombre, int modo );
+        ArchivoDocLexico( std::string nombre, std::string nombreIdx, int modo );
 
 		void comenzarLectura();
 		void leerPosicion( int posicion, DocLexicoData &data );
