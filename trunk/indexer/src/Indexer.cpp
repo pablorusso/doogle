@@ -20,7 +20,7 @@ struct CantTermsComparer
 
 Indexer::Indexer( string targetFolder )
 {
-	_targetFolder = targetFolder;
+	_targetFolder = targetFolder + "/";
 
 	remove( lexicalFileName().c_str() );
 	remove( documentsFileName().c_str() );

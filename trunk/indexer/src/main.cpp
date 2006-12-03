@@ -8,7 +8,7 @@ using namespace std;
 
 void usage()
 {
-	cerr <<	"usage: indexer [path]\n ex: indexer /home/me/html/\n";
+	cerr <<	"usage: indexer [inputPath] [outputPath]\n ex: indexer /home/pablo/facultad/input /home/pablo/facultad/output\n";
 	::exit( 1 );
 }
 
@@ -96,11 +96,17 @@ int main( int argc, char *argv[] )
 {
 	try
 	{
-		string path;
-		if ( argc != 2 )
-			path = "/home/pablo/facultad/input"; //usage();
+		string outputPath;
+		string inputPath;
+		if ( argc != 3 )
+		 	usage();
 		else
-			path = argv[1];
+		{
+			// inputPath = "/home/pablo/facultad/input";
+			// outputPath = "/home/pablo/facultad/output";
+			inputPath  = argv[1];
+			outputPath = argv[2];
+		}
 
 		string lexFN    	 = "";
 		string docFN 		 = "";
@@ -112,7 +118,7 @@ int main( int argc, char *argv[] )
 		string noLiderFN 	 = "";
 		string noLiderIdxFN  = "";
 
-		Indexer *indexer = new Indexer( "/home/pablo/facultad/output/" );
+		Indexer *indexer = new Indexer( outputPath );
 		try
 		{
 			lexFN    	 	= indexer->lexicalFileName();
@@ -125,7 +131,7 @@ int main( int argc, char *argv[] )
 			noLiderFN 	 	= indexer->noLeaderFileName();
 			noLiderIdxFN  	= indexer->noLeaderIdxFileName();
 
-			indexer->buildIndex( path );
+			indexer->buildIndex( inputPath );
 			cout << endl;
 		}
 		catch ( string ex )
