@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <string>
-#include <pthread.h>
 
 using namespace std;
 
@@ -22,9 +21,10 @@ void ArchivoDocLexico::validarModo( int modoBuscado )
 }
 
 //COSNTRUCTORES
-ArchivoDocLexico::ArchivoDocLexico( std::string nombre, int modo )
+ArchivoDocLexico::ArchivoDocLexico( std::string nombre, std::string nombreIdx, int modo )
 {
 	_nombre = nombre;
+	_nombreIdx = nombreIdx;
 	_modo = modo;
 	_tamanio = sizeof( IdocLexicoFileReg );
 	_posicionSecuencial = 0;
@@ -45,20 +45,19 @@ ArchivoDocLexico::ArchivoDocLexico( std::string nombre, int modo )
 
        _fstream.open( nombre.c_str(), modeToUse );
        if ( !_fstream.is_open() )
-          throw string("El archivo no pudo ser abierto");
+          throw string("El archivo " + nombre + " no pudo ser abierto");
 	}
 
 	// Indice
-	string nombreIdx = "I_" + nombre;
     _fstreamIdx.open( nombreIdx.c_str(), modeToUse  );
     if ( !_fstreamIdx.is_open() )
 	{
-       	_fstreamIdx.clear();
+       _fstreamIdx.clear();
        _fstreamIdx.open( nombreIdx.c_str(), ios::out | ios::binary );
        _fstreamIdx.close();
-       _fstream.open( nombreIdx.c_str(), modeToUse );
+       _fstreamIdx.open( nombreIdx.c_str(), modeToUse );
        if ( !_fstreamIdx.is_open() )
-          throw string("El archivo no pudo ser abierto");
+          throw string("El archivo " + nombreIdx + " no pudo ser abierto");
 	}
 
 	// Calculo la cantida de registros en base al indice

@@ -30,6 +30,7 @@ class ArchivoLexico
 		void escribir( const LexicoData data );
         bool fin();
 
+		void mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems );
         ~ArchivoLexico();
 };
 

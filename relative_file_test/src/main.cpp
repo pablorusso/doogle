@@ -52,7 +52,7 @@ void probarArchivoDocumentos( string name )
 {
 	cout << endl << "DOCUMENTOS" << endl;
 	DocumentData dato;
-	ArchivoDocumentos *ptrArch = new ArchivoDocumentos( name , ESCRIBIR );
+	ArchivoDocumentos *ptrArch = new ArchivoDocumentos( name, "I_" + name, ESCRIBIR );
 	try
 	{
 		for( int i=1; i <= 5 ; i++ )
@@ -71,7 +71,7 @@ void probarArchivoDocumentos( string name )
 	}
 	delete ptrArch;
 
-	ptrArch = new ArchivoDocumentos( name , LEER );
+	ptrArch = new ArchivoDocumentos( name, "I_" + name, LEER );
 	try
 	{
 		ptrArch->comenzarLectura();
@@ -93,7 +93,7 @@ void probarArchivoDocLexico( string name )
 	cout << endl << "DOCUMENTO-LEXICO-SEGUIDORES" << endl;
 
 	DocLexicoData dato;
-	ArchivoDocLexico *ptrArch = new ArchivoDocLexico( name , ESCRIBIR );
+	ArchivoDocLexico *ptrArch = new ArchivoDocLexico( name, "I_" + name, ESCRIBIR );
 	try
 	{
 		for( int i = 1; i <= 5 ; i++ )
@@ -117,7 +117,7 @@ void probarArchivoDocLexico( string name )
 	}
 	delete ptrArch;
 
-	ptrArch = new ArchivoDocLexico( name , LEER );
+	ptrArch = new ArchivoDocLexico( name, "I_" + name, LEER );
 	try
 	{
 		ptrArch->comenzarLectura();

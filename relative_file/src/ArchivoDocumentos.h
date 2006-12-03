@@ -13,6 +13,7 @@ class ArchivoDocumentos
 		std::fstream  _fstreamIdx;
 
         std::string   _nombre;
+		std::string   _nombreIdx;
 		int			  _modo;
 		long 		  _posicionSecuencial;
 		long		  _tamanio;
@@ -23,7 +24,7 @@ class ArchivoDocumentos
 		void escribirImpl( const DocumentData data );
 		void leerImpl( DocumentData& data );
 	public:
-        ArchivoDocumentos( std::string nombre, int modo );
+        ArchivoDocumentos( std::string nombre, std::string nombreIdx, int modo );
 
 		void comenzarLectura();
 		void leerPosicion( int posicion, DocumentData &data );

@@ -3,13 +3,14 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
+#include <sstream>
 
-#include "ArchivoLexico.h"
 #include "LexicoData.h"
 
 void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 {
-	ArchivoLexico* lex = ( ArchivoLexico* ) userData;
+	WordPair *lex = (WordPair *) userData;
 
 	string word = "";
  	for ( int i = 0; i < len; i++)
@@ -22,35 +23,22 @@ void ParserWrapper::charHandler( void *userData, const XML_Char *s, int len )
 		{
 			if ( word != "" )
 			{
-				if ( lex != NULL )
-				{
-					LexicalData data;
-					data.termino = word;
-					lex->escribir( data );
-				}
+				(*lex)[ word ] += 1;
 				word = "";
 			}
 		}
 	}
 
 	if ( word != "" )
-	{
-		if ( lex != NULL )
-		{
-			LexicalData data;
-			data.termino = word;
-			lex->escribir( data );
-		}
-
-		word = "";
-	}
+		(*lex)[ word ] += 1;
 }
 
-ParserWrapper::ParserWrapper( string fileName, ArchivoLexico &lexico )
+ParserWrapper::ParserWrapper( string fileName, WordPair *lexico )
 {
+	_lexico = lexico;
 	_parser = XML_ParserCreate( NULL );
 	XML_SetCharacterDataHandler( _parser, charHandler );
-	XML_SetUserData( _parser, &lexico );
+	XML_SetUserData( _parser, lexico );
 
 	_xmlFile = new ifstream( fileName.c_str() );
 	if ( ! _xmlFile->is_open() )
@@ -66,7 +54,12 @@ void ParserWrapper::Parse()
 	while ( !done )
 	{
 		if ( ! XML_Parse( _parser, buffer.c_str(), buffer.length(), done ) )
-			throw string( XML_ErrorString( XML_GetErrorCode( _parser ) ) + " en la linea " + XML_GetCurrentLineNumber( _parser ) );
+		{
+			string msg = XML_ErrorString( XML_GetErrorCode( _parser ) );
+			long line = XML_GetCurrentLineNumber( _parser );
+			ostringstream os; os << line;
+			throw string( "Error parseando el archivo. Mensaje: " + msg + " en la linea " +  os.str() );
+		}
 
 		std::getline( *_xmlFile, buffer );
 		done = _xmlFile->fail();
