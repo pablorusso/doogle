@@ -28,6 +28,7 @@ class ArchivoDocLexico
         ArchivoDocLexico( std::string nombre, std::string nombreIdx, int modo );
 
 		void comenzarLectura();
+		void leerOffset( long offset, DocLexicoData &data );
 		void leerPosicion( int posicion, DocLexicoData &data );
 		bool leer( DocLexicoData &data );
 		int  escribirPosicion( int posicion, const DocLexicoData data );

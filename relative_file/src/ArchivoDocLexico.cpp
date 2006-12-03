@@ -91,7 +91,6 @@ int ArchivoDocLexico::escribirImpl( DocLexicoData data )
 	_fstream.write( static_cast<const char *>( temp ), sizeof( int ) );
 
 	// terminos
-	int cantTerminos = 0;
 	int idTermino; long peso;
 	LexicalPair::iterator curr = data.terminos.begin();
 	while ( curr != data.terminos.end() )
@@ -104,11 +103,10 @@ int ArchivoDocLexico::escribirImpl( DocLexicoData data )
    		temp = &peso;
 		_fstream.write( static_cast<const char *>( temp ), sizeof(long) );
 		++curr;
-		cantTerminos++;
 	}
-
+	// cout << endl << endl << "ID: " << newId << "LIDER CANT SEG WRITE: " << data.seguidores.size();
 	// seguidores
-	int cantSeguidores = 0;
+
 	int idDoc; long offset_seg;
 	Seguidores::iterator currSeg = data.seguidores.begin();
 	while ( currSeg != data.seguidores.end() )
@@ -117,20 +115,19 @@ int ArchivoDocLexico::escribirImpl( DocLexicoData data )
    		temp = &idDoc;
 		_fstream.write( static_cast<const char *>( temp ), sizeof(int) );
 
-		offset = static_cast< long >( currSeg->second );
+		offset_seg = static_cast< long >( currSeg->second );
    		temp = &offset_seg;
 		_fstream.write( static_cast<const char *>( temp ), sizeof(long) );
 
 		++currSeg;
-		cantSeguidores++;
 	}
 
 	// indice
 	void *buffer = malloc( _tamanio );
 	IdocLexicoFileReg *datoNuevo = static_cast<IdocLexicoFileReg *> ( buffer );
 	datoNuevo->id = newId;
-	datoNuevo->cantTerminos = cantTerminos;
-	datoNuevo->cantSeguidores = cantSeguidores;
+	datoNuevo->cantTerminos = data.terminos.size();
+	datoNuevo->cantSeguidores = data.seguidores.size();
 	datoNuevo->offset = offset;
     _fstreamIdx.write( static_cast<const char*>( buffer ), _tamanio );
 	delete datoNuevo;
@@ -157,7 +154,7 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 	_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 	// terminos y seguidores
-	int idTermino; long peso;
+	int idTermino=0; long peso=0;
 	data.terminos.clear();
 	while ( cantTerminos > 0 )
 	{
@@ -171,9 +168,9 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 		cantTerminos--;
 	}
 
-	int idDoc; long offset_seg;
+	int idDoc=0; long offset_seg=0;
 	data.seguidores.clear();
-	while ( cantTerminos > 0 )
+	while ( cantSeguidores > 0 )
 	{
 		temp = &idDoc;
 		_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
@@ -202,6 +199,13 @@ void ArchivoDocLexico::leerPosicion( int posicion, DocLexicoData& data )
 {
 	validarModo( LEER );
 	_fstreamIdx.seekg ( posicionLogicaAReal( posicion ), ios::beg );
+	leerImpl( data );
+}
+
+void ArchivoDocLexico::leerOffset( long offset, DocLexicoData &data )
+{
+	validarModo( LEER );
+	_fstreamIdx.seekg ( offset, ios::beg );
 	leerImpl( data );
 }
 

@@ -27,7 +27,7 @@ double MathIndex::norm( LexicalPair &items, long &cantTerminos )
 double MathIndex::cosineRank( LexicalPair &items1, LexicalPair &items2, double norm1, double norm2 )
 {
 	if ( norm1 == 0 || norm2 == 0 )
-		return 0;
+		return 1;
 
 	double denominador = norm1 * norm2;
 

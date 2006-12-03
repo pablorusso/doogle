@@ -22,34 +22,40 @@ Indexer::Indexer( string targetFolder )
 {
 	_targetFolder = targetFolder;
 
+	remove( lexicalFileName().c_str() );
 	remove( documentsFileName().c_str() );
 	remove( documentsIdxFileName().c_str() );
+	remove( leaderFileName().c_str() );
+	remove( leaderIdxFileName().c_str() );
+	remove( followersFileName().c_str() );
+	remove( followersIdxFileName().c_str() );
+	remove( noLeaderFileName().c_str() );
+	remove( noLeaderIdxFileName().c_str() );
 	remove( docLexFileName().c_str() );
 	remove( docLexIdxFileName().c_str() );
-	remove( lexicalFileName().c_str() );
 
 	_document = new ArchivoDocumentos ( Indexer::documentsFileName(), Indexer::documentsIdxFileName(), ESCRIBIR | LEER );
 }
 
 string Indexer::documentsFileName()
 {
-	return _targetFolder + "documentos.dat";
+	return _targetFolder + "documents.dat";
 }
 string Indexer::documentsIdxFileName()
 {
-	return _targetFolder + "I_documentos.dat";
+	return _targetFolder + "documents.idx";
 }
 string Indexer::docLexFileName()
 {
-	return _targetFolder + "documentoLexico.dat";
+	return _targetFolder + "documentLex.dat";
 }
 string Indexer::docLexIdxFileName()
 {
-	return _targetFolder + "I_documentoLexico.dat";
+	return _targetFolder + "documentLex.idx";
 }
 string Indexer::lexicalFileName()
 {
-	return _targetFolder + "lexico.dat";
+	return _targetFolder + "lexical.dat";
 }
 string Indexer::leaderFileName()
 {
@@ -57,7 +63,7 @@ string Indexer::leaderFileName()
 }
 string Indexer::leaderIdxFileName()
 {
-	return _targetFolder + "I_leaders.dat";
+	return _targetFolder + "leaders.idx";
 }
 string Indexer::followersFileName()
 {
@@ -65,7 +71,7 @@ string Indexer::followersFileName()
 }
 string Indexer::followersIdxFileName()
 {
-	return _targetFolder + "I_followers.dat";
+	return _targetFolder + "followers.idx";
 }
 string Indexer::noLeaderFileName()
 {
@@ -73,13 +79,13 @@ string Indexer::noLeaderFileName()
 }
 string Indexer::noLeaderIdxFileName()
 {
-	return _targetFolder + "I_noLeader.dat";
+	return _targetFolder + "noLeader.idx";
 }
 
 float Indexer::deltaCosineForEqual()
 {
 	// TODO: Parametrizar empiricamente...
-	return 0.2;
+	return 0.5;
 }
 
 int Indexer::fileFilter( const struct dirent *entry )
@@ -92,13 +98,10 @@ int Indexer::fileFilter( const struct dirent *entry )
 
 void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 {
-	long docCount = _document->size();
+	long docCount 	  = _document->size();
+	uint maxLeaders   = ( int ) ceil( sqrt( docCount / 2 ) );
+	uint maxFollowers = docCount - maxLeaders;
 	DocLexicoData data;
-
-	// ver como se calcula esto
-	uint maxLeaders   = sqrt( docCount );
-	uint maxFollowers = sqrt( docCount );
-
 	map< int, DocLexicoData > leaders;
 
 	ArchivoDocLexico *followers     = new ArchivoDocLexico( followersFileName(), followersIdxFileName(), ESCRIBIR | LEER );
@@ -113,7 +116,7 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 	docLex->leer( data );
 	while ( !docLex->fin() )
 	{
-		bool isFollower = false; float lessRank  = 0;
+		bool isFollower = false; float lessRank  = 2;
 		int bestLeaderId = -1;
 
 		map< int, DocLexicoData >::iterator curr = leaders.begin();
@@ -148,15 +151,15 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 
 		if ( ! isFollower )
 		{
-			DocLexicoData bestLeader = static_cast< DocLexicoData > ( leaders[ bestLeaderId ] );
+			DocLexicoData *bestLeader = static_cast< DocLexicoData *> ( & (leaders[ bestLeaderId ]) );
 			// Si no es seguidor natural de nadie
-			if ( bestLeader.seguidores.size() < maxFollowers )
+			if ( bestLeader->seguidores.size() < maxFollowers )
 			{
 				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
 				followers->escribir( data );
 
 				long offset = followers->ultimaPosicionEscrita();
-				bestLeader.seguidores[ data.id ] = offset;
+				bestLeader->seguidores[ data.id ] = offset;
 			}
 			else
 			{
@@ -168,6 +171,8 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 					withoutLeader->escribir( data );
 			}
 		}
+
+		docLex->leer( data );
 	}
 
 	delete followers;
@@ -178,8 +183,9 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 	map< int, DocLexicoData >::iterator curr = leaders.begin();
 	while ( curr != leaders.end() )
 	{
-		DocLexicoData itemLeader = static_cast< DocLexicoData >( curr->second );
-		aLeaders->escribir( itemLeader );
+		DocLexicoData *itemLeader = static_cast< DocLexicoData *>( &(curr->second) );
+		cout << endl << endl << "CANT SEG " << itemLeader->seguidores.size();
+		aLeaders->escribir( *itemLeader );
 		++curr;
 	}
 	delete aLeaders;
@@ -308,7 +314,7 @@ void Indexer::sortByQuantity()
 void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
 {
 	int count, i;
-	string tempLex = _targetFolder + "lexicoTemp.dat";
+	string tempLex = _targetFolder + "lexicalTemp.dat";
 	struct direct **files = NULL;
 
     count = scandir ( path.c_str(), &files, Indexer::fileFilter, NULL);
@@ -382,4 +388,7 @@ void Indexer::buildIndex( string fromPath )
 Indexer::~Indexer()
 {
 	delete _document;
+
+	remove( docLexFileName().c_str() );
+	remove( docLexIdxFileName().c_str() );
 }
