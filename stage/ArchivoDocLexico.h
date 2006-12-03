@@ -18,6 +18,7 @@ class ArchivoDocLexico
 		long 		  _posicionSecuencial;
 		long		  _tamanio;
 		long 		  _cantRegistros;
+		long		  _lastWrite;
 
 		long posicionLogicaAReal( long posicion );
 		void validarModo( int modoBuscado );
@@ -32,6 +33,7 @@ class ArchivoDocLexico
 		int  escribirPosicion( int posicion, const DocLexicoData data );
 		int  escribir( const DocLexicoData data );
         bool fin();
+		long ultimaPosicionEscrita();
 
         ~ArchivoDocLexico();
 };

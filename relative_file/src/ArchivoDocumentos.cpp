@@ -205,6 +205,11 @@ bool ArchivoDocumentos::fin()
 	return _fstreamIdx.eof();
 }
 
+long ArchivoDocumentos::size()
+{
+	return _cantRegistros;
+}
+
 ArchivoDocumentos::~ArchivoDocumentos()
 {
 	_fstream.close();
