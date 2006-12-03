@@ -80,9 +80,9 @@ void ArchivoDocLexico::comenzarLectura()
 	_fstreamIdx.seekg( _posicionSecuencial );
 }
 
-void ArchivoDocLexico::escribirImpl( DocLexicoData data )
+int ArchivoDocLexico::escribirImpl( DocLexicoData data )
 {
-	int newId   = _cantRegistros+1;
+	int newId = data.id <= 0 ? _cantRegistros+1 : data.id;
 	long offset = _fstream.tellp();
 
 	// id
@@ -102,7 +102,6 @@ void ArchivoDocLexico::escribirImpl( DocLexicoData data )
 		peso = static_cast< long >( curr->second );
    		temp = &peso;
 		_fstream.write( static_cast<const char *>( temp ), sizeof(long) );
-
 		++curr;
 		cantTerminos++;
 	}
@@ -136,6 +135,7 @@ void ArchivoDocLexico::escribirImpl( DocLexicoData data )
 	delete datoNuevo;
 
 	_cantRegistros++;
+	return newId;
 }
 
 void ArchivoDocLexico::leerImpl( DocLexicoData& data )
@@ -156,9 +156,6 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 	_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 	// terminos y seguidores
-	LexicalPair terminos = data.terminos;
-    Seguidores  seguidores = data.seguidores;
-
 	int idTermino; long peso;
 	while ( cantTerminos > 0 )
 	{
@@ -168,7 +165,7 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 		temp = &peso;
 		_fstream.read( static_cast<char  *>( temp ), sizeof( long ) );
 
-		terminos[ idTermino ] = peso;
+		data.terminos[ idTermino ] = peso;
 		cantTerminos--;
 	}
 
@@ -181,16 +178,16 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 		temp = &offset_seg;
 		_fstream.read( static_cast<char *>( temp ), sizeof( long ) );
 
-		seguidores[ idDoc ] = offset_seg;
+		data.seguidores[ idDoc ] = offset_seg;
 		cantSeguidores--;
 	}
 }
 
-void ArchivoDocLexico::escribirPosicion( int posicion, DocLexicoData data )
+int ArchivoDocLexico::escribirPosicion( int posicion, DocLexicoData data )
 {
 	validarModo( ESCRIBIR );
 	_fstreamIdx.seekp ( posicionLogicaAReal( posicion ), ios::beg );
-	escribirImpl( data );
+	return escribirImpl( data );
 }
 
 void ArchivoDocLexico::leerPosicion( int posicion, DocLexicoData& data )
@@ -200,17 +197,14 @@ void ArchivoDocLexico::leerPosicion( int posicion, DocLexicoData& data )
 	leerImpl( data );
 }
 
-void ArchivoDocLexico::escribir( const DocLexicoData data )
+int ArchivoDocLexico::escribir( const DocLexicoData data )
 {
 	validarModo( ESCRIBIR );
 
-	long posicionActual = _fstreamIdx.tellp();
-	if ( posicionActual != _posicionSecuencial )
-		_fstreamIdx.seekp ( _posicionSecuencial, ios::beg );
+	_fstreamIdx.seekp( 0, ios::end );
+	_fstream.seekp( 0, ios::end );
 
-	escribirImpl( data );
-
-	_posicionSecuencial = _fstreamIdx.tellp();
+	return escribirImpl( data );
 }
 
 bool ArchivoDocLexico::leer( DocLexicoData& data )
@@ -224,13 +218,12 @@ bool ArchivoDocLexico::leer( DocLexicoData& data )
 	leerImpl( data );
 
 	_posicionSecuencial = _fstreamIdx.tellg();
-	return this->fin();
+	return !this->fin();
 }
 
 bool ArchivoDocLexico::fin()
 {
-	bool esEof = ( _fstreamIdx.peek() == char_traits<char>::eof() );
-  	return esEof;
+	return _fstreamIdx.eof ();
 }
 
 ArchivoDocLexico::~ArchivoDocLexico()

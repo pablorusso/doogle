@@ -74,14 +74,18 @@ void ArchivoDocumentos::comenzarLectura()
 	_fstreamIdx.seekg( _posicionSecuencial );
 }
 
-void ArchivoDocumentos::escribirImpl( DocumentData data )
+int ArchivoDocumentos::escribirImpl( DocumentData data )
 {
 	int newId = _cantRegistros+1;
 	long offset = _fstream.tellp();
 
 	void *buffer = malloc( _tamanio );
 	IdocumentFileReg *datoNuevo = static_cast<IdocumentFileReg *> ( buffer );
-	datoNuevo->id = _cantRegistros+1;
+	if ( data.id <= 0 )
+		datoNuevo->id = _cantRegistros+1;
+	else
+		datoNuevo->id = data.id;
+
 	datoNuevo->offset = offset;
     _fstreamIdx.write( static_cast<const char*>( buffer ), _tamanio );
 	_cantRegistros++;
@@ -114,6 +118,8 @@ void ArchivoDocumentos::escribirImpl( DocumentData data )
 	// cantTermDistintos
 	temp = &data.cantTermDistintos;
 	_fstream.write( static_cast<char*>( temp ), sizeof( long ) );
+
+	return newId;
 }
 
 void ArchivoDocumentos::leerImpl( DocumentData& data )
@@ -156,11 +162,11 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 	data.cantTermDistintos = cantTerm;
 }
 
-void ArchivoDocumentos::escribirPosicion( int posicion, DocumentData data )
+int ArchivoDocumentos::escribirPosicion( int posicion, DocumentData data )
 {
 	validarModo( ESCRIBIR );
 	_fstreamIdx.seekp ( posicionLogicaAReal( posicion ), ios::beg );
-	escribirImpl( data );
+	return escribirImpl( data );
 }
 
 void ArchivoDocumentos::leerPosicion( int posicion, DocumentData& data )
@@ -170,17 +176,14 @@ void ArchivoDocumentos::leerPosicion( int posicion, DocumentData& data )
 	leerImpl( data );
 }
 
-void ArchivoDocumentos::escribir( const DocumentData data )
+int ArchivoDocumentos::escribir( const DocumentData data )
 {
 	validarModo( ESCRIBIR );
 
-	long posicionActual = _fstreamIdx.tellp();
-	if ( posicionActual != _posicionSecuencial )
-		_fstreamIdx.seekp ( _posicionSecuencial, ios::beg );
+	_fstreamIdx.seekp( 0, ios::end );
+	_fstream.seekp( 0, ios::end );
 
-	escribirImpl( data );
-
-	_posicionSecuencial = _fstreamIdx.tellp();
+	return escribirImpl( data );
 }
 
 bool ArchivoDocumentos::leer( DocumentData& data )
@@ -194,13 +197,12 @@ bool ArchivoDocumentos::leer( DocumentData& data )
 	leerImpl( data );
 
 	_posicionSecuencial = _fstreamIdx.tellg();
-	return this->fin();
+	return !this->fin();
 }
 
 bool ArchivoDocumentos::fin()
 {
-	bool esEof = ( _fstreamIdx.peek() == char_traits<char>::eof() );
-  	return esEof;
+	return _fstreamIdx.eof();
 }
 
 ArchivoDocumentos::~ArchivoDocumentos()

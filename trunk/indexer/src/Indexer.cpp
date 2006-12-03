@@ -152,6 +152,7 @@ void Indexer::buildLeaders()
 void Indexer::buildLexical( string path )
 {
 	int count, i;
+	string tempLex = _targetFolder + "lexicoTemp.dat";
 	struct direct **files = NULL;
 
     count = scandir ( path.c_str(), &files, Indexer::fileFilter, NULL);
@@ -171,42 +172,43 @@ void Indexer::buildLexical( string path )
 		{
 			try
 			{
+				DocLexicoData docLexData;
 				WordPair wordsFound;
+
 				ParserWrapper parser( fileName, &wordsFound );
 				parser.Parse();
 
 				// GRABO EL LEXICO
-				string tempLex = _targetFolder + "lexicoTemp.dat";
 				// Paso los terminos nuevos al lexico
-				LexicalPair mergedItems;
 				ArchivoLexico *lexical = new ArchivoLexico( Indexer::lexicalFileName(), ESCRIBIR | LEER );
-				lexical->mergeWith( tempLex, wordsFound, mergedItems );
+				lexical->mergeWith( tempLex, wordsFound, docLexData.terminos );
 				delete lexical;
 				// borro el lexico viejo y renombro el nuevo como el original
 				remove ( Indexer::lexicalFileName().c_str() );
 				rename ( tempLex.c_str(), Indexer::lexicalFileName().c_str() );
 
-
 				// GRABO EL DOCUMENTO
 				DocumentData docData;
 				docData.ruta = fileName;
-				docData.norma = calcularNorma( mergedItems, docData.cantTermDistintos );
-				_document->escribir( docData );
+				docData.norma = calcularNorma( docLexData.terminos, docData.cantTermDistintos );
+				int newDocId = _document->escribir( docData );
 
-				// TODO: Tengo que asociar el documento con lo terminos
+				// GRABO LA ASOCIACION DOCUMENTO-TERMINOS
+				docLexData.id = newDocId;
+
 				/*
-				DocumentLexicalData docLexData;
-				// Seguidores  seguidores; LexicalPair terminos;
-				// id - peso typedef map<int, long> LexicalPair;
-				// id - offset typedef map<int, long> Seguidores;
-				int count = lex->GetCount();
-				DocumentLexicalData docLexData( docData.GetId(), count );
-				for( int i = 0; i < count; ++i )
-					docLexData.AddLexicalPair( mergedItems[i] );
-				docLex.AbuildLexicalddRecord( docLexData );
+				cout << "PRUEBA RELACION " << endl;
+				LexicalPair::iterator curr = docLexData.terminos.begin();
+				while ( curr != docLexData.terminos.end() )
+				{
+					int idTermino = static_cast< int >( curr->first );
+   					long peso = static_cast< long >( curr->second );
+   					cout << "(" << idTermino << ", " << peso << ") ";
+					++curr;
+				}
 				*/
 
-				// delete wordsFound;
+				_documentLexico->escribir( docLexData );
 			}
 			catch ( string ex )
 			{
@@ -231,6 +233,6 @@ void Indexer::buildIndex( string path )
 
 Indexer::~Indexer()
 {
-	delete _document;
 	delete _documentLexico;
+	delete _document;
 }
