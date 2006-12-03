@@ -157,6 +157,7 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 
 	// terminos y seguidores
 	int idTermino; long peso;
+	data.terminos.clear();
 	while ( cantTerminos > 0 )
 	{
 		temp = &idTermino;
@@ -170,6 +171,7 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 	}
 
 	int idDoc; long offset_seg;
+	data.seguidores.clear();
 	while ( cantTerminos > 0 )
 	{
 		temp = &idDoc;

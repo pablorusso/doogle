@@ -27,10 +27,11 @@ class Indexer
 
 		static float deltaCosineForEqual();
 		static int fileFilter( const struct dirent *entry );
-		void buildLexical( string path );
+
+		void buildLexical( string path, ArchivoDocLexico *documentLexico );
 		void buildLeaders();
 		double calcularNorma( LexicalPair &items, long &cantTerminos );
-
+		void sortByQuantity();
 	public:
 		string documentsFileName();
 		string documentsIdxFileName();
