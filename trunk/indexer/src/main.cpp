@@ -12,61 +12,81 @@ void usage()
 	::exit( 1 );
 }
 
-void listarArchivos( string lexFN, string docFN, string docIdxFN, string docLexFN, string docLexIdxFN)
+void listarDocLexicoData( DocLexicoData dato )
 {
-	ArchivoLexico     *ptrArch1 = new ArchivoLexico( lexFN, LEER );
-	ArchivoDocumentos *ptrArch2 = new ArchivoDocumentos( docFN, docIdxFN, LEER );
-	ArchivoDocLexico  *ptrArch3 = new ArchivoDocLexico( docLexFN, docLexIdxFN, LEER );
+	cout << "** id: " << dato.id << " - TERMINOS: ";
+	LexicalPair::iterator curr = dato.terminos.begin();
+	while ( curr != dato.terminos.end() )
+	{
+		int idTermino = static_cast< int >( curr->first );
+		long peso = static_cast< long >( curr->second );
+		cout << "(" << idTermino << ", " << peso << ") ";
+		++curr;
+	}
+}
+
+void listarArchivos( string lexFN, string docFN, string docIdxFN, string liderFN, string liderIdxFN, string seguidorFN, string seguidorIdxFN, string noLiderFN, string noLiderIdxFN )
+{
+	ArchivoLexico     *lexicoFile 		= new ArchivoLexico( lexFN, LEER );
+	ArchivoDocumentos *documentosFile 	= new ArchivoDocumentos( docFN, docIdxFN, LEER );
+	ArchivoDocLexico  *lideresFile 		= new ArchivoDocLexico( liderFN, liderIdxFN, LEER );
+	ArchivoDocLexico  *seguidoresFile 	= new ArchivoDocLexico( seguidorFN, seguidorIdxFN, LEER );
+	ArchivoDocLexico  *sinLiderFile 	= new ArchivoDocLexico( noLiderFN, noLiderIdxFN, LEER );
+
+	LexicoData    dato1;
+	DocumentData  dato2;
+	DocLexicoData dato3;
+	DocLexicoData dato4;
 	try
 	{
-		LexicoData dato1;
-		DocumentData dato2;
-		DocLexicoData dato3;
-
 		cout << endl << "LEXICO";
-		ptrArch1->comenzarLectura();
-		while( ptrArch1->leer( dato1 ) )
+		lexicoFile->comenzarLectura();
+		while( lexicoFile->leer( dato1 ) )
 			cout << endl << "** id: " << dato1.id << " - palabra: " << dato1.termino;
 
 		cout << endl << "DOCUMENTOS";
-		ptrArch2->comenzarLectura();
-		while( ptrArch2->leer( dato2 ) )
+		documentosFile->comenzarLectura();
+		while( documentosFile->leer( dato2 ) )
 			cout << endl << "** id: " << dato2.id << " - ruta: " << dato2.ruta << " - norma: " << dato2.norma << " - termDist: " << dato2.cantTermDistintos;
 
-		cout << endl << "DOCUMENTO-LEXICO-SEGUIDORES";
-		ptrArch3->comenzarLectura();
-		while( ptrArch3->leer( dato3 ) )
+		cout << endl << "DOCUMENTO-TERMINOS";
+		lideresFile->comenzarLectura();
+		while( lideresFile->leer( dato3 ) )
 		{
-			cout << endl << "** id: " << dato3.id << " - TERMINOS: ";
-			LexicalPair::iterator curr = dato3.terminos.begin();
-			while ( curr != dato3.terminos.end() )
-			{
-				int idTermino = static_cast< int >( curr->first );
-   				long peso = static_cast< long >( curr->second );
-   				cout << "(" << idTermino << ", " << peso << ") ";
-				++curr;
-			}
+			cout << endl << "Lider: ";
+			listarDocLexicoData( dato3 );
 
-			cout << "SEGUIDORES: ";
 			Seguidores::iterator currSeg = dato3.seguidores.begin();
 			while ( currSeg != dato3.seguidores.end() )
 			{
-				int idDoc = static_cast< int >( currSeg->first );
    				long offset = static_cast< long >( currSeg->second );
-   				cout << "(" << idDoc << ", " << offset << ") ";
+				cout << endl << "-------->Seguidor: ";
+				seguidoresFile->leerOffset( offset, dato4 );
+   				listarDocLexicoData( dato4 );
+
 				++currSeg;
 			}
 		}
 
+
+		cout << endl << "DOCUMENTO-TERMINOS SIN LIDER";
+		sinLiderFile->comenzarLectura();
+		while( sinLiderFile->leer( dato3 ) )
+		{
+			cout << endl << "Sin lider: ";
+			listarDocLexicoData( dato3 );
+		}
 	}
 	catch ( string a )
 	{
 		cout << endl << a << endl ;
 	}
 
-	delete ptrArch1;
-	delete ptrArch2;
-	delete ptrArch3;
+	delete lexicoFile;
+	delete documentosFile;
+	delete lideresFile;
+	delete seguidoresFile;
+	delete sinLiderFile;
 
 	cout << endl << endl;
 }
@@ -82,20 +102,28 @@ int main( int argc, char *argv[] )
 		else
 			path = argv[1];
 
-		string docFN    = "";
-		string docIdxFN = "";
-		string docLexFN = "";
-		string docLexIdxFN = "";
-		string lexFN    = "";
+		string lexFN    	 = "";
+		string docFN 		 = "";
+		string docIdxFN 	 = "";
+		string liderFN 		 = "";
+		string liderIdxFN 	 = "";
+		string seguidorFN 	 = "";
+		string seguidorIdxFN = "";
+		string noLiderFN 	 = "";
+		string noLiderIdxFN  = "";
 
 		Indexer *indexer = new Indexer( "/home/pablo/facultad/output/" );
 		try
 		{
-			lexFN = indexer->lexicalFileName();
-			docFN = indexer->documentsFileName();
-			docIdxFN = indexer->documentsIdxFileName();
-			docLexFN = indexer->docLexFileName();
-			docLexIdxFN = indexer->docLexIdxFileName();
+			lexFN    	 	= indexer->lexicalFileName();
+			docFN 		 	= indexer->documentsFileName();
+			docIdxFN 	 	= indexer->documentsIdxFileName();
+			liderFN 		= indexer->leaderFileName();
+			liderIdxFN 	 	= indexer->leaderIdxFileName();
+			seguidorFN 	 	= indexer->followersFileName();
+			seguidorIdxFN 	= indexer->followersIdxFileName();
+			noLiderFN 	 	= indexer->noLeaderFileName();
+			noLiderIdxFN  	= indexer->noLeaderIdxFileName();
 
 			indexer->buildIndex( path );
 			cout << endl;
@@ -106,7 +134,7 @@ int main( int argc, char *argv[] )
 		}
 		delete indexer;
 
-		listarArchivos( lexFN, docFN, docIdxFN, docLexFN, docLexIdxFN );
+		listarArchivos( lexFN, docFN, docIdxFN, liderFN, liderIdxFN, seguidorFN, seguidorIdxFN, noLiderFN, noLiderIdxFN );
 	}
 	catch ( string ex )
 	{
@@ -115,49 +143,3 @@ int main( int argc, char *argv[] )
 
  	return 0;
 }
-
-
-/*
-float cosineRank( LexicalPair []pairList1, float norm1, int pairList1Count, LexicalPair []pairList2, float norm2, int pairList2Count )
-{
-	int i = 0;
-	int j = 0;
-
-	AxBxC / n(A)
-	float numerador   = 0;
-	float denominador = 0;
-	while( i < pairList1Count )
-	{
-		while ( i < pairList1Count && j < pairList2Count )
-		{
-			int id1 = pairList1[i].GetId();
-			int id2 = pairList2[j].GetId();
-
-			if ( id1 == id2 )
-			{
-				numerador   = numerador + pairList1[i].GetWeight() * pairList2[j].GetWeight();
-				denominador = denominador + ( pairList1[i].GetWeight() + pairList2[j].GetWeight() ) * ( pairList1[i].GetWeight() + pairList2[j].GetWeight() );
-				i++;
-				j++;
-			}
-			else
-			{
-				if ( id1 > id2 )
-				{
-					j++;
-				}
-				else
-				{
-					i++
-				}
-			}
-		}
-	}
-
-	if ( denominador == 0 )
-		return 1;
-
-	// falta la raiz cuadrada y ver como usar las normas
-	return numerador / denominador;
-}
-*/
