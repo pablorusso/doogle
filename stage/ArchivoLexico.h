@@ -18,7 +18,7 @@ class ArchivoLexico
 
 		long posicionLogicaAReal( long posicion );
 		void validarModo( int modoBuscado );
-		void escribirImpl( const LexicoData data );
+		int  escribirImpl( const LexicoData data );
 		void leerImpl( LexicoData& data );
 	public:
         ArchivoLexico( std::string nombre, int modo );
@@ -26,8 +26,8 @@ class ArchivoLexico
 		void comenzarLectura();
 		void leerPosicion( int posicion, LexicoData &data );
 		bool leer( LexicoData &data );
-		void escribirPosicion( int posicion, const LexicoData data );
-		void escribir( const LexicoData data );
+		int  escribirPosicion( int posicion, const LexicoData data );
+		int  escribir( const LexicoData data );
         bool fin();
 
 		void mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems );

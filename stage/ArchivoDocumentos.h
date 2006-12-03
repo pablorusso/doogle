@@ -21,7 +21,7 @@ class ArchivoDocumentos
 
 		long posicionLogicaAReal( long posicion );
 		void validarModo( int modoBuscado );
-		void escribirImpl( const DocumentData data );
+		int  escribirImpl( const DocumentData data );
 		void leerImpl( DocumentData& data );
 	public:
         ArchivoDocumentos( std::string nombre, std::string nombreIdx, int modo );
@@ -29,8 +29,8 @@ class ArchivoDocumentos
 		void comenzarLectura();
 		void leerPosicion( int posicion, DocumentData &data );
 		bool leer( DocumentData &data );
-		void escribirPosicion( int posicion, const DocumentData data );
-		void escribir( const DocumentData data );
+		int  escribirPosicion( int posicion, const DocumentData data );
+		int  escribir( const DocumentData data );
         bool fin();
 
         ~ArchivoDocumentos();

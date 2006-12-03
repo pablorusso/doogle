@@ -23,27 +23,20 @@ void listarArchivos( string lexFN, string docFN, string docIdxFN, string docLexF
 		DocumentData dato2;
 		DocLexicoData dato3;
 
-		cout << endl << "LEXICO" << endl;
+		cout << endl << "LEXICO";
 		ptrArch1->comenzarLectura();
-		while( !ptrArch1->fin() )
-		{
-			ptrArch1->leer( dato1 );
-			cout << "** id: " << dato1.id << " - palabra: " << dato1.termino << endl;
-		}
+		while( ptrArch1->leer( dato1 ) )
+			cout << endl << "** id: " << dato1.id << " - palabra: " << dato1.termino;
 
-		cout << endl << "DOCUMENTOS" << endl;
+		cout << endl << "DOCUMENTOS";
 		ptrArch2->comenzarLectura();
-		while( !ptrArch2->fin() )
-		{
-			ptrArch2->leer( dato2 );
-			cout << "** id: " << dato2.id << " - ruta: " << dato2.ruta << " - norma: " << dato2.norma << " - termDist: " << dato2.cantTermDistintos << endl;
-		}
+		while( ptrArch2->leer( dato2 ) )
+			cout << endl << "** id: " << dato2.id << " - ruta: " << dato2.ruta << " - norma: " << dato2.norma << " - termDist: " << dato2.cantTermDistintos;
 
-		cout << endl << "DOCUMENTO-LEXICO-SEGUIDORES" << endl;
+		cout << endl << "DOCUMENTO-LEXICO-SEGUIDORES";
 		ptrArch3->comenzarLectura();
-		while( !ptrArch3->fin() )
+		while( ptrArch3->leer( dato3 ) )
 		{
-			ptrArch3->leer( dato3 );
 			cout << endl << "** id: " << dato3.id << " - TERMINOS: ";
 			LexicalPair::iterator curr = dato3.terminos.begin();
 			while ( curr != dato3.terminos.end() )
@@ -75,7 +68,7 @@ void listarArchivos( string lexFN, string docFN, string docIdxFN, string docLexF
 	delete ptrArch2;
 	delete ptrArch3;
 
-	cout << endl;
+	cout << endl << endl;
 }
 
 

@@ -21,7 +21,7 @@ class ArchivoDocLexico
 
 		long posicionLogicaAReal( long posicion );
 		void validarModo( int modoBuscado );
-		void escribirImpl( const DocLexicoData data );
+		int  escribirImpl( const DocLexicoData data );
 		void leerImpl( DocLexicoData& data );
 	public:
         ArchivoDocLexico( std::string nombre, std::string nombreIdx, int modo );
@@ -29,8 +29,8 @@ class ArchivoDocLexico
 		void comenzarLectura();
 		void leerPosicion( int posicion, DocLexicoData &data );
 		bool leer( DocLexicoData &data );
-		void escribirPosicion( int posicion, const DocLexicoData data );
-		void escribir( const DocLexicoData data );
+		int  escribirPosicion( int posicion, const DocLexicoData data );
+		int  escribir( const DocLexicoData data );
         bool fin();
 
         ~ArchivoDocLexico();
