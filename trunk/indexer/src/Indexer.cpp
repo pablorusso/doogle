@@ -90,7 +90,7 @@ string Indexer::noLeaderIdxFileName()
 
 float Indexer::deltaCosineForEqual()
 {
-	return 0; //0.75;
+	return 0.75;
 }
 
 int Indexer::fileFilter( const struct dirent *entry )
@@ -104,8 +104,8 @@ int Indexer::fileFilter( const struct dirent *entry )
 void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 {
 	int docCount 	  = _document->size();
-	uint maxLeaders   = 1; //( int ) ceil( sqrt( docCount ) );
-	uint maxFollowers = docCount; //( int ) ceil( sqrt( docCount / 2 ) );
+	uint maxLeaders   = ( int ) ceil( sqrt( docCount ) );
+	uint maxFollowers = ( int ) ceil( sqrt( docCount / 2 ) );
 
 	DocLexicoData data;
 	map< int, DocLexicoData > leaders;

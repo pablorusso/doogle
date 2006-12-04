@@ -3,14 +3,14 @@
 
 
 # Cantidad maxima de terminos por documento
-MAX_TERMINOS_DOC=200;
+MAX_TERMINOS_DOC=100;
 
 # cuantos documentos generar.
-CANT_DOCS=100;
+CANT_DOCS=50;
 
 # Cuantos terminos distintos se usan del diccionario.
 # si es mayor que los terminos del diccionario no limita nada.
-CANT_TERMINOS_TOTALES=10000
+CANT_TERMINOS_TOTALES=200
 #10000
 
 #De donde se sacan las palabras random. Este path es de gentoo
@@ -43,7 +43,7 @@ do
 	#echo "linea $nrolinea palabra: "
 	#echo `sed -n $nrolinea$p $DICCIONARIO | sed 's/#$//' | tr -d "'áéíóúñÑÁÉÍÓÚüÜ" `;
 
-	echo `sed -n $nrolinea$p $DICCIONARIO | sed 's/#$//' | tr "'áéíóúñÑÁÉÍÓÚüÜ" "'aeiounNAEIOUuU" ` | tr -d "'" >> $i.html;
+	echo `sed -n $nrolinea$p $DICCIONARIO | sed 's/#$//' | tr "'áéíóúñÑÁÉÍÓÚüÜ¨" "'aeiounNAEIOUuUu" ` | tr -d "'" >> $i.html;
         echo "</title></head><body><div>" >> $i.html;
 
         let CANT_TERMINOS_DOC=$RANDOM%$MAX_TERMINOS_DOC;

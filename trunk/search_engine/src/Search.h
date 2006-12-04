@@ -20,6 +20,7 @@ class Search
 	public:
 		Search( string indexFolder );
 		void doSearch( vector<Query *> query,  vector< string > &result );
+		void doSearchAll( vector<Query *> query,  vector< string > &result );
 };
 #endif
 

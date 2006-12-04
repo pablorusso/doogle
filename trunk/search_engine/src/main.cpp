@@ -24,9 +24,10 @@ struct my_msgbuf
 
 void usage()
 {
-	cerr <<	"usage: search_engine [type] [indexerOutputPath] [consulta]" << endl;
-	cerr << "ex: search_engine 1 /home/pablo/facultad/output t1" << endl;
-	cerr << "type: 1- consola 2- cola de mensajes" << endl;
+	cerr <<	"usage: search_engine [type] [method] [indexerOutputPath] [consulta]" << endl;
+	cerr << "       ex: search_engine 2 all /home/pablo/facultad/output t1" << endl;
+	cerr << "       [type]   1=consola 2=cola de mensajes" << endl;
+	cerr << "       [method] lead=lideres all=todos" << endl;
 	::exit( 1 );
 }
 
@@ -60,14 +61,19 @@ void destroyChannel( int chanId )
 	}
 }
 
-bool procesar( Search *search, string queryString, vector< string > &result )
+bool procesar( Search *search, string queryString, vector< string > &result, bool useLeader )
 {
 	bool isOk;
 	vector<Query *> query;
 	try
 	{
 		QueryParser::Parse( queryString, query );
-		search->doSearch( query, result );
+
+		if ( useLeader )
+			search->doSearch( query, result );
+		else
+			search->doSearchAll( query, result );
+
 		isOk = true;
 	}
 	catch( InvalidTokenException ex )
@@ -91,12 +97,15 @@ bool procesar( Search *search, string queryString, vector< string > &result )
 
 int useMsgQueue( int argc, char* argv[] )
 {
+	string method;
 	string indexFolder;
-	if ( argc != 3 )
+	if ( argc != 4 )
 		usage();
 	else
-		indexFolder = argv[2];
-
+	{
+		method = argv[2];
+		indexFolder = argv[3];
+	}
 	struct my_msgbuf buf;
 
 	int msqCGItoSearchid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
@@ -131,8 +140,16 @@ int useMsgQueue( int argc, char* argv[] )
 		{
 			cout << endl << "Palabra completa: " << temp ;
 
+			// leo el metodo a usar
+			if ( msgrcv( msqCGItoSearchid, (struct msgbuf *)&buf, sizeof(buf), 0, 0) == -1 )
+			{
+				perror("msgrcv");
+				exit(1);
+			}
+
+			bool useLeader = buf.mtext == '1';
 			vector<string> documentos;
-			bool isOk = procesar( search, temp, documentos );
+			bool isOk = procesar( search, temp, documentos, useLeader );
 
 			struct my_msgbuf codigoInicial;
 			codigoInicial.mtype = 1;
@@ -183,14 +200,16 @@ int useMsgQueue( int argc, char* argv[] )
 
 int useConsole( int argc, char* argv[] )
 {
-	if ( argc < 4 )
+	if ( argc < 5 )
 		usage();
 
+	string method = argv[2];
+
 	string indexFolder;
-	indexFolder = argv[2];
+	indexFolder = argv[3];
 
 	string word = "";
-	for( int i = 3; i < argc; i++ )
+	for( int i = 4; i < argc; i++ )
 	{
 		if ( word.size() > 0 ) word += " ";
 		word += argv[i];
@@ -201,7 +220,7 @@ int useConsole( int argc, char* argv[] )
 	cout << endl << "comienza la busqueda!" << endl;
 
 	Search *search = new Search( indexFolder );
-	bool isOk = procesar( search, word, documentos );
+	bool isOk = procesar( search, word, documentos, method != "all" );
 	if ( !isOk )
 		cout << "hubo un error!" << endl;
 
@@ -218,7 +237,7 @@ int useConsole( int argc, char* argv[] )
 
 int main( int argc, char* argv[] )
 {
-	if ( argc < 2 ) usage();
+	if ( argc < 3 ) usage();
 
 	string type = argv[1];
 	if ( type == "1" )

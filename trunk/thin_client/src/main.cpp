@@ -58,6 +58,10 @@ int main(int argc, char* argv[])
 	string name  = "bsearch";
 	string value = cgi.GetValue( name );
 
+	name = "cmethod";
+	string method = cgi.GetValue( name );
+	bool useLeader = method.size() != 0;
+
 	int msqCGItoSearchid = openChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
 	int msqSearchToCGIid = openChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_search_cgi" );
 
@@ -74,6 +78,12 @@ int main(int argc, char* argv[])
 	barraCero.mtype = 1;
 	barraCero.mtext = '\0';
 	if ( msgsnd( msqCGItoSearchid, (struct msgbuf *)&barraCero, sizeof(barraCero), 0) == -1 )
+		perror("msgsnd");
+
+	struct my_msgbuf methodMsg;
+	methodMsg.mtype = 1;
+	methodMsg.mtext = useLeader ? '1' : '0';
+	if ( msgsnd( msqCGItoSearchid, (struct msgbuf *)&methodMsg, sizeof(methodMsg), 0) == -1 )
 		perror("msgsnd");
 
 	struct my_msgbuf errorCode;
