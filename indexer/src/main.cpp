@@ -57,7 +57,7 @@ void listarArchivos( string targetFolder, string lexFN, string docFN, string doc
 		cout << endl << "DOCUMENTOS";
 		documentosFile->comenzarLectura();
 		while( documentosFile->leer( dato2 ) )
-			cout << endl << "** id: " << dato2.id << " - ruta: " << dato2.ruta << " - norma: " << dato2.norma << " - termDist: " << dato2.cantTermDistintos;
+			cout << endl << "** id: " << dato2.id << " - ruta: " << dato2.ruta ;
 
 		cout << endl << "DOCUMENTO-TERMINOS";
 		lideresFile->comenzarLectura();

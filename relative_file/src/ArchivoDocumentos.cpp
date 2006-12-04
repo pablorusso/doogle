@@ -111,14 +111,6 @@ int ArchivoDocumentos::escribirImpl( DocumentData &data )
 	temp = &c;
 	_fstream.write( static_cast<char*>( temp ), sizeof(char) );
 
-	// norma
-	temp = &data.norma;
-	_fstream.write( static_cast<char*>( temp ), sizeof( double ) );
-
-	// cantTermDistintos
-	temp = &data.cantTermDistintos;
-	_fstream.write( static_cast<char*>( temp ), sizeof( int ) );
-
 	return newId;
 }
 
@@ -137,8 +129,6 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 
     int 		id;
   	string      ruta;
-    double      norma;
-    int        cantTerm;
 	char        c;
 
 	void* temp = &id;
@@ -151,15 +141,8 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 		_fstream.read( static_cast<char*>( temp ), sizeof(char) );
 	}
 
-	temp = &norma;
-	_fstream.read( static_cast<char*>( temp ), sizeof( double ) );
-	temp = &cantTerm;
-	_fstream.read( static_cast<char*>( temp ), sizeof( int ) );
-
 	data.id    = id;
 	data.ruta  = ruta;
-	data.norma = norma;
-	data.cantTermDistintos = cantTerm;
 }
 
 int ArchivoDocumentos::escribirPosicion( int posicion, DocumentData &data )

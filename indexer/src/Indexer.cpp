@@ -129,7 +129,7 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 			DocLexicoData *itemLeader = static_cast< DocLexicoData *>( &curr->second );
 
 			// Comparo usando el ranking del coseno el documento con cada lider
-			double rank = MathIndex::cosineRank( itemLeader->terminos, data.terminos, MathIndex::norm( itemLeader->terminos ), MathIndex::norm( data.terminos ) );
+			double rank = MathIndex::cosineRank( itemLeader->terminos, data.terminos, itemLeader->norma, data.norma );
 			if ( rank >= deltaCosineForEqual() )
 			{
 				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
@@ -352,16 +352,16 @@ void Indexer::buildLexical( string lexicoFileName, string path, ArchivoDocLexico
 				if ( documentLexico != NULL )
 				{
 					DocumentData docData;
-					double norma = MathIndex::norm( docLexData.terminos, docData.cantTermDistintos );
-					if ( docData.cantTermDistintos != 0 )
+					double norma = MathIndex::norm( docLexData.terminos );
+					if ( docLexData.terminos.size() != 0 )
 					{
 						// GRABO EL DOCUMENTO
 						docData.ruta = fileName;
-						docData.norma = norma;
 						int newDocId = _document->escribir( docData );
 
 						// GRABO LA ASOCIACION DOCUMENTO-TERMINOS
 						docLexData.id = newDocId;
+						docLexData.norma = norma;
 						documentLexico->escribir( docLexData );
 					}
 				}

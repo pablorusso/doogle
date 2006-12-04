@@ -89,6 +89,11 @@ int ArchivoDocLexico::escribirImpl( DocLexicoData &data )
 	void *temp = &newId;
 	_fstream.write( static_cast<const char *>( temp ), sizeof( int ) );
 
+	// norma
+	double norma = data.norma;
+	temp = &norma;
+	_fstream.write( static_cast<const char *>( temp ), sizeof( double ) );
+
 	// terminos
 	LexicalPair::iterator curr = data.terminos.begin();
 	while ( curr != data.terminos.end() )
@@ -147,9 +152,16 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 
 	_fstream.seekg( offset );
 
+	// id
 	int id = 0;
 	void* temp = &id;
 	_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
+
+	// norma
+	double norma = 0;
+	temp = &norma;
+	_fstream.read( static_cast<char *>( temp ), sizeof( double ) );
+	data.norma = norma;
 
 	// terminos y seguidores
 	data.terminos.clear();
