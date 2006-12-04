@@ -67,8 +67,12 @@ depends: localstage
 	@echo ' '
 	@echo 'Creando directorio de dependencias: ' $(MKDIR) $(LIB)
 	@$(MKDIR) $(LIB)
-	@echo 'Copiando dependencias binarias: ' $(COPY) $(DEP_LIB_WS) $(LIB)
-	@$(COPY) $(DEP_LIB_WS) $(LIB)
+
+	@if [ "$(DEP_LIB_WS)" ]; then \
+		echo 'Copiando dependencias binarias: ' $(COPY) $(DEP_LIB_WS) $(LIB); \
+		$(COPY) $(DEP_LIB_WS) $(LIB); \
+	fi
+
 	@echo 'Copiando dependencias con headers: ' $(COPY) $(DEP_INC_WS) $(LIB)
 	@$(COPY) $(DEP_INC_WS) $(LIB)
 

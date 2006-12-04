@@ -15,26 +15,26 @@ class ArchivoDocLexico
         std::string   _nombre;
 		std::string   _nombreIdx;
 		int			  _modo;
-		long 		  _posicionSecuencial;
-		long		  _tamanio;
-		long 		  _cantRegistros;
-		long		  _lastWrite;
+		int 		  _posicionSecuencial;
+		int		  	  _tamanio;
+		int 		  _cantRegistros;
+		int		  	  _lastWrite;
 
-		long posicionLogicaAReal( long posicion );
+		int posicionLogicaAReal( int posicion );
 		void validarModo( int modoBuscado );
-		int  escribirImpl( const DocLexicoData data );
+		int  escribirImpl( DocLexicoData &data );
 		void leerImpl( DocLexicoData& data );
 	public:
         ArchivoDocLexico( std::string nombre, std::string nombreIdx, int modo );
 
 		void comenzarLectura();
-		void leerOffset( long offset, DocLexicoData &data );
+		void leerOffset( int offset, DocLexicoData &data );
 		void leerPosicion( int posicion, DocLexicoData &data );
 		bool leer( DocLexicoData &data );
-		int  escribirPosicion( int posicion, const DocLexicoData data );
-		int  escribir( const DocLexicoData data );
+		int  escribirPosicion( int posicion, DocLexicoData &data );
+		int  escribir( DocLexicoData &data );
         bool fin();
-		long ultimaPosicionEscrita();
+		int ultimaPosicionEscrita();
 
         ~ArchivoDocLexico();
 };

@@ -8,7 +8,7 @@
 using namespace std;
 
 // id - offset
-typedef map<int, long> Seguidores;
+typedef map<int, int> Seguidores;
 
 class DocLexicoData
 {
@@ -16,6 +16,8 @@ class DocLexicoData
 		int  id;
 		Seguidores  seguidores;
 		LexicalPair terminos;
+
+		DocLexicoData();
 };
 
 #endif

@@ -18,7 +18,7 @@ using namespace std;
 
 struct my_msgbuf
 {
-	long mtype;
+	int mtype;
 	char mtext;
 };
 
@@ -124,7 +124,7 @@ int useMsgQueue( int argc, char* argv[] )
 			exit(1);
 		}
 
-		cout << "[search_engine] - CGI to search_engine = " << buf.mtext << std::flush;
+		cout << endl << "[search_engine] - CGI to search_engine = " << buf.mtext << std::flush;
 		if ( buf.mtext != '\0' )
 			temp += buf.mtext;
 		else

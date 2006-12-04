@@ -15,27 +15,27 @@ class ArchivoDocumentos
         std::string   _nombre;
 		std::string   _nombreIdx;
 		int			  _modo;
-		long 		  _posicionSecuencial;
-		long		  _tamanio;
-		long 		  _cantRegistros;
+		int 		  _posicionSecuencial;
+		int		  _tamanio;
+		int 		  _cantRegistros;
 
-		long posicionLogicaAReal( long posicion );
+		int posicionLogicaAReal( int posicion );
 		void validarModo( int modoBuscado );
-		int  escribirImpl( const DocumentData data );
+		int  escribirImpl( DocumentData &data );
 		void leerImpl( DocumentData& data );
-		DocumentData *buscarPorIdImpl( int docId, DocumentData &foundData, long minimo, long maximo );
+		DocumentData *buscarPorIdImpl( int docId, DocumentData &foundData, int minimo, int maximo );
 	public:
         ArchivoDocumentos( std::string nombre, std::string nombreIdx, int modo );
 
 		void comenzarLectura();
 		void leerPosicion( int posicion, DocumentData &data );
 		bool leer( DocumentData &data );
-		int  escribirPosicion( int posicion, const DocumentData data );
-		int  escribir( const DocumentData data );
+		int  escribirPosicion( int posicion, DocumentData &data );
+		int  escribir( DocumentData &data );
         bool fin();
 
 		DocumentData *buscarPorId( int docId, DocumentData &foundData );
-		long size();
+		int size();
 
         ~ArchivoDocumentos();
 };

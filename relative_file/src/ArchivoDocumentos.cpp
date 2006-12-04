@@ -8,7 +8,7 @@ using namespace std;
 typedef struct
 {
 	int 		id;
-    long        offset;
+    int        offset;
 }IdocumentFileReg;
 
 
@@ -60,7 +60,7 @@ ArchivoDocumentos::ArchivoDocumentos( std::string nombre, std::string nombreIdx,
 }
 
 //METODOS-FUNCIONALIDAD
-long ArchivoDocumentos::posicionLogicaAReal( long posicion )
+int ArchivoDocumentos::posicionLogicaAReal( int posicion )
 {
 	if ( posicion < 0 || posicion > _cantRegistros )
 		throw string ( "La posicion esta fuera del rango permitido" );
@@ -74,10 +74,10 @@ void ArchivoDocumentos::comenzarLectura()
 	_fstreamIdx.seekg( _posicionSecuencial );
 }
 
-int ArchivoDocumentos::escribirImpl( DocumentData data )
+int ArchivoDocumentos::escribirImpl( DocumentData &data )
 {
 	int newId = _cantRegistros+1;
-	long offset = _fstream.tellp();
+	int offset = _fstream.tellp();
 
 	void *buffer = malloc( _tamanio );
 	IdocumentFileReg *datoNuevo = static_cast<IdocumentFileReg *> ( buffer );
@@ -117,7 +117,7 @@ int ArchivoDocumentos::escribirImpl( DocumentData data )
 
 	// cantTermDistintos
 	temp = &data.cantTermDistintos;
-	_fstream.write( static_cast<char*>( temp ), sizeof( long ) );
+	_fstream.write( static_cast<char*>( temp ), sizeof( int ) );
 
 	return newId;
 }
@@ -138,7 +138,7 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
     int 		id;
   	string      ruta;
     double      norma;
-    long        cantTerm;
+    int        cantTerm;
 	char        c;
 
 	void* temp = &id;
@@ -154,7 +154,7 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 	temp = &norma;
 	_fstream.read( static_cast<char*>( temp ), sizeof( double ) );
 	temp = &cantTerm;
-	_fstream.read( static_cast<char*>( temp ), sizeof( long ) );
+	_fstream.read( static_cast<char*>( temp ), sizeof( int ) );
 
 	data.id    = id;
 	data.ruta  = ruta;
@@ -162,7 +162,7 @@ void ArchivoDocumentos::leerImpl( DocumentData& data )
 	data.cantTermDistintos = cantTerm;
 }
 
-int ArchivoDocumentos::escribirPosicion( int posicion, DocumentData data )
+int ArchivoDocumentos::escribirPosicion( int posicion, DocumentData &data )
 {
 	validarModo( ESCRIBIR );
 	_fstreamIdx.seekp ( posicionLogicaAReal( posicion ), ios::beg );
@@ -176,7 +176,7 @@ void ArchivoDocumentos::leerPosicion( int posicion, DocumentData& data )
 	leerImpl( data );
 }
 
-int ArchivoDocumentos::escribir( const DocumentData data )
+int ArchivoDocumentos::escribir( DocumentData &data )
 {
 	validarModo( ESCRIBIR );
 
@@ -190,7 +190,7 @@ bool ArchivoDocumentos::leer( DocumentData& data )
 {
 	validarModo( LEER );
 
-	long posicionActual = _fstreamIdx.tellg();
+	int posicionActual = _fstreamIdx.tellg();
 	if ( posicionActual != _posicionSecuencial )
 		_fstreamIdx.seekg (  _posicionSecuencial, ios::beg );
 
@@ -202,7 +202,7 @@ bool ArchivoDocumentos::leer( DocumentData& data )
 	return !this->fin();
 }
 
-DocumentData *ArchivoDocumentos::buscarPorIdImpl( int docId, DocumentData &foundData, long minimo, long maximo )
+DocumentData *ArchivoDocumentos::buscarPorIdImpl( int docId, DocumentData &foundData, int minimo, int maximo )
 {
 	if ( minimo > maximo )
 		return NULL;
@@ -230,7 +230,7 @@ bool ArchivoDocumentos::fin()
 	return _fstreamIdx.eof()  || _cantRegistros == 0;
 }
 
-long ArchivoDocumentos::size()
+int ArchivoDocumentos::size()
 {
 	return _cantRegistros;
 }

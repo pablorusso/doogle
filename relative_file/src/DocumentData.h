@@ -11,7 +11,9 @@ class DocumentData
 		int 		id;
     	std::string ruta;
         double      norma;
-        long        cantTermDistintos;
+        int        cantTermDistintos;
+
+		DocumentData();
 };
 
 #endif
