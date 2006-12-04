@@ -29,7 +29,7 @@ class Indexer
 		static float deltaCosineForEqual();
 		static int fileFilter( const struct dirent *entry );
 
-		void buildLexical( string path, ArchivoDocLexico *documentLexico );
+		void buildLexical( string lexicoFileName, string path, ArchivoDocLexico *documentLexico, ArchivoLexico *stopWords );
 		void buildLeaders( ArchivoDocLexico *docLex );
 		void sortByQuantity();
 
@@ -38,6 +38,7 @@ class Indexer
 		string docLexFileName();
 		string docLexIdxFileName();
 		string lexicalFileName();
+		string lexStopFileName();
 		string leaderFileName();
 		string leaderIdxFileName();
 		string followersFileName();
@@ -46,7 +47,7 @@ class Indexer
 		string noLeaderIdxFileName();
 	public:
 		Indexer( string targetFolder );
-		void buildIndex( string path );
+		void buildIndex( string path, string stopWordPath );
 		~Indexer();
 };
 

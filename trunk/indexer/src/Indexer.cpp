@@ -23,6 +23,7 @@ Indexer::Indexer( string targetFolder )
 	_targetFolder = targetFolder;
 
 	remove( lexicalFileName().c_str() );
+	remove( lexStopFileName().c_str() );
 	remove( documentsFileName().c_str() );
 	remove( documentsIdxFileName().c_str() );
 	remove( leaderFileName().c_str() );
@@ -57,6 +58,11 @@ string Indexer::lexicalFileName()
 {
 	return _targetFolder + LEX_FN;
 }
+string Indexer::lexStopFileName()
+{
+	return _targetFolder + LEX_STOP_FN;
+}
+
 string Indexer::leaderFileName()
 {
 	return _targetFolder + LEAD_FN;
@@ -84,8 +90,7 @@ string Indexer::noLeaderIdxFileName()
 
 float Indexer::deltaCosineForEqual()
 {
-	// TODO: Parametrizar empiricamente...
-	return 0.5;
+	return 0; //0.75;
 }
 
 int Indexer::fileFilter( const struct dirent *entry )
@@ -99,8 +104,9 @@ int Indexer::fileFilter( const struct dirent *entry )
 void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 {
 	int docCount 	  = _document->size();
-	uint maxLeaders   = ( int ) ceil( sqrt( docCount / 2 ) );
-	uint maxFollowers = docCount - maxLeaders;
+	uint maxLeaders   = 1; //( int ) ceil( sqrt( docCount ) );
+	uint maxFollowers = docCount; //( int ) ceil( sqrt( docCount / 2 ) );
+
 	DocLexicoData data;
 	map< int, DocLexicoData > leaders;
 
@@ -108,13 +114,11 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 	ArchivoDocLexico *withoutLeader = new ArchivoDocLexico( noLeaderFileName(), noLeaderIdxFileName(), ESCRIBIR | LEER );
 
 	docLex->comenzarLectura();
-	docLex->leer( data );
-	if ( !docLex->fin() )
+	if ( docLex->leer( data ) )
 		leaders[ data.id ] = data;
 
 	// Para cada documento
-	docLex->leer( data );
-	while ( !docLex->fin() )
+	while ( docLex->leer( data ) )
 	{
 		bool isFollower = false; float lessRank = -1;
 		int bestLeaderId = -1;
@@ -169,8 +173,6 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 					withoutLeader->escribir( data );
 			}
 		}
-
-		docLex->leer( data );
 	}
 
 	delete followers;
@@ -308,10 +310,10 @@ void Indexer::sortByQuantity()
 	rename ( partIdxName1.c_str(), Indexer::docLexIdxFileName().c_str() );
 }
 
-void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
+void Indexer::buildLexical( string lexicoFileName, string path, ArchivoDocLexico *documentLexico, ArchivoLexico *stopWords )
 {
 	int count, i;
-	string tempLex = _targetFolder + "lexicalTemp.dat";
+	string tempLex = lexicoFileName + "tmp";
 	struct direct **files = NULL;
 
     count = scandir ( path.c_str(), &files, Indexer::fileFilter, NULL);
@@ -339,22 +341,30 @@ void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
 
 				// GRABO EL LEXICO
 				// Paso los terminos nuevos al lexico
-				ArchivoLexico *lexical = new ArchivoLexico( Indexer::lexicalFileName(), ESCRIBIR | LEER );
-				lexical->mergeWith( tempLex, wordsFound, docLexData.terminos );
+				ArchivoLexico *lexical = new ArchivoLexico( lexicoFileName, ESCRIBIR | LEER );
+				lexical->mergeWith( tempLex, wordsFound, docLexData.terminos, stopWords );
 				delete lexical;
+
 				// borro el lexico viejo y renombro el nuevo como el original
-				remove ( Indexer::lexicalFileName().c_str() );
-				rename ( tempLex.c_str(), Indexer::lexicalFileName().c_str() );
+				remove ( lexicoFileName.c_str() );
+				rename ( tempLex.c_str(), lexicoFileName.c_str() );
 
-				// GRABO EL DOCUMENTO
-				DocumentData docData;
-				docData.ruta = fileName;
-				docData.norma = MathIndex::norm( docLexData.terminos, docData.cantTermDistintos );
-				int newDocId = _document->escribir( docData );
+				if ( documentLexico != NULL )
+				{
+					DocumentData docData;
+					double norma = MathIndex::norm( docLexData.terminos, docData.cantTermDistintos );
+					if ( docData.cantTermDistintos != 0 )
+					{
+						// GRABO EL DOCUMENTO
+						docData.ruta = fileName;
+						docData.norma = norma;
+						int newDocId = _document->escribir( docData );
 
-				// GRABO LA ASOCIACION DOCUMENTO-TERMINOS
-				docLexData.id = newDocId;
-				documentLexico->escribir( docLexData );
+						// GRABO LA ASOCIACION DOCUMENTO-TERMINOS
+						docLexData.id = newDocId;
+						documentLexico->escribir( docLexData );
+					}
+				}
 			}
 			catch ( string ex )
 			{
@@ -363,15 +373,22 @@ void Indexer::buildLexical( string path, ArchivoDocLexico *documentLexico )
 		}
 		else
 		{
-			buildLexical( fileName, documentLexico );
+			buildLexical( lexicoFileName, fileName, documentLexico, stopWords );
 		}
 	}
 }
 
-void Indexer::buildIndex( string fromPath )
+void Indexer::buildIndex( string fromPath, string stopWordPath )
 {
+	ArchivoLexico *lexicoStop = NULL;
+	if ( stopWordPath != "" )
+	{
+		buildLexical( Indexer::lexStopFileName(), stopWordPath, NULL, NULL );
+		lexicoStop = new ArchivoLexico  ( Indexer::lexStopFileName(), LEER );
+	}
+
 	ArchivoDocLexico *documentLexico = new ArchivoDocLexico  ( Indexer::docLexFileName(), Indexer::docLexIdxFileName(), ESCRIBIR | LEER );
-	buildLexical( fromPath, documentLexico );
+	buildLexical( Indexer::lexicalFileName(), fromPath, documentLexico, lexicoStop );
 	delete documentLexico;
 
 	sortByQuantity();
@@ -379,6 +396,8 @@ void Indexer::buildIndex( string fromPath )
 	documentLexico = new ArchivoDocLexico  ( Indexer::docLexFileName(), Indexer::docLexIdxFileName(), ESCRIBIR | LEER );
 	buildLeaders( documentLexico );
 	delete documentLexico;
+
+	if ( lexicoStop != NULL ) delete lexicoStop;
 }
 
 

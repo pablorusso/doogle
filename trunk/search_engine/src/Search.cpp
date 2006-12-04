@@ -96,7 +96,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		while( lideres->leer( leaderData ) )
 		{
 			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair );
-			if ( rankCos > bestCos )
+			if ( rankCos >= bestCos )
 			{
 				bestCos = rankCos;
 				bestLeaderData = leaderData; // debe faltar el constructor de copia
@@ -121,7 +121,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 				seguidores->leerOffset( offset, seguidorData );
 
 				double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair );
-				if ( rankCos >= 0 )
+				if ( rankCos > 0 )
 					encontrados.insert( multimap<double, int>::value_type( 1-rankCos, seguidorData.id ) );
 				++currSeg;
 			}
@@ -139,7 +139,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		while( noLideres->leer( noLiderData ) )
 		{
 			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair );
-			if ( rankCos >= 0 )
+			if ( rankCos > 0 )
 				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, noLiderData.id ) );
 		}
 		delete noLideres;

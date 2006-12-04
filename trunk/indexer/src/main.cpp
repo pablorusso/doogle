@@ -8,7 +8,7 @@ using namespace std;
 
 void usage()
 {
-	cerr <<	"usage: indexer [inputPath] [outputPath]\n ex: indexer /home/pablo/facultad/input /home/pablo/facultad/output\n";
+	cerr <<	"usage: indexer [inputPath] [outputPath] [stopPath]\n ex: indexer /home/pablo/facultad/input /home/pablo/facultad/output /home/pablo/facultad/stop\n";
 	::exit( 1 );
 }
 
@@ -108,14 +108,15 @@ int main( int argc, char *argv[] )
 	{
 		string outputPath;
 		string inputPath;
-		if ( argc != 3 )
+		string stopPath = "";
+		if ( argc != 3 && argc != 4 )
 		 	usage();
 		else
 		{
-			// inputPath = "/home/pablo/facultad/input";
-			// outputPath = "/home/pablo/facultad/output";
 			inputPath  = argv[1];
 			outputPath = argv[2];
+			if ( argc == 4 )
+				stopPath = argv[3];
 		}
 
 		if ( outputPath[ outputPath.length()-1 ] != '/' )
@@ -124,10 +125,13 @@ int main( int argc, char *argv[] )
 		if ( inputPath[ inputPath.length()-1 ] == '/' )
 			inputPath.erase( inputPath.length()-1, 1 );
 
+		if ( stopPath[ stopPath.length()-1 ] == '/' )
+			stopPath.erase( stopPath.length()-1, 1 );
+
 		Indexer *indexer = new Indexer( outputPath );
 		try
 		{
-			indexer->buildIndex( inputPath );
+			indexer->buildIndex( inputPath, stopPath );
 			cout << endl;
 		}
 		catch ( string ex )

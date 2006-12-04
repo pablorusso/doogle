@@ -31,7 +31,7 @@ class ArchivoLexico
 		int  escribir( LexicoData &data );
         bool fin();
 
-		void mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems );
+		void mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems, ArchivoLexico *stopWords );
 		LexicoData *buscarTermino( string word, LexicoData &foundData );
         ~ArchivoLexico();
 };
