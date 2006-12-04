@@ -25,8 +25,18 @@ void listarDocLexicoData( DocLexicoData dato )
 	}
 }
 
-void listarArchivos( string lexFN, string docFN, string docIdxFN, string liderFN, string liderIdxFN, string seguidorFN, string seguidorIdxFN, string noLiderFN, string noLiderIdxFN )
+void listarArchivos( string targetFolder, string lexFN, string docFN, string docIdxFN, string liderFN, string liderIdxFN, string seguidorFN, string seguidorIdxFN, string noLiderFN, string noLiderIdxFN )
 {
+	lexFN = targetFolder + lexFN;
+	docFN = targetFolder + docFN;
+	docIdxFN = targetFolder + docIdxFN;
+	liderFN = targetFolder + liderFN;
+	liderIdxFN = targetFolder + liderIdxFN;
+	seguidorFN = targetFolder + seguidorFN;
+	seguidorIdxFN = targetFolder + seguidorIdxFN;
+	noLiderFN = targetFolder + noLiderFN;
+	noLiderIdxFN = targetFolder + noLiderIdxFN;
+
 	ArchivoLexico     *lexicoFile 		= new ArchivoLexico( lexFN, LEER );
 	ArchivoDocumentos *documentosFile 	= new ArchivoDocumentos( docFN, docIdxFN, LEER );
 	ArchivoDocLexico  *lideresFile 		= new ArchivoDocLexico( liderFN, liderIdxFN, LEER );
@@ -108,29 +118,15 @@ int main( int argc, char *argv[] )
 			outputPath = argv[2];
 		}
 
-		string lexFN    	 = "";
-		string docFN 		 = "";
-		string docIdxFN 	 = "";
-		string liderFN 		 = "";
-		string liderIdxFN 	 = "";
-		string seguidorFN 	 = "";
-		string seguidorIdxFN = "";
-		string noLiderFN 	 = "";
-		string noLiderIdxFN  = "";
+		if ( outputPath[ outputPath.length()-1 ] != '/' )
+			outputPath = outputPath + "/";
+
+		if ( inputPath[ inputPath.length()-1 ] == '/' )
+			inputPath.erase( inputPath.length()-1, 1 );
 
 		Indexer *indexer = new Indexer( outputPath );
 		try
 		{
-			lexFN    	 	= indexer->lexicalFileName();
-			docFN 		 	= indexer->documentsFileName();
-			docIdxFN 	 	= indexer->documentsIdxFileName();
-			liderFN 		= indexer->leaderFileName();
-			liderIdxFN 	 	= indexer->leaderIdxFileName();
-			seguidorFN 	 	= indexer->followersFileName();
-			seguidorIdxFN 	= indexer->followersIdxFileName();
-			noLiderFN 	 	= indexer->noLeaderFileName();
-			noLiderIdxFN  	= indexer->noLeaderIdxFileName();
-
 			indexer->buildIndex( inputPath );
 			cout << endl;
 		}
@@ -140,7 +136,7 @@ int main( int argc, char *argv[] )
 		}
 		delete indexer;
 
-		listarArchivos( lexFN, docFN, docIdxFN, liderFN, liderIdxFN, seguidorFN, seguidorIdxFN, noLiderFN, noLiderIdxFN );
+		listarArchivos( outputPath, LEX_FN, DOC_FN, DOC_IDX_FN, LEAD_FN, LEAD_IDX_FN, FOLLOW_FN, FOLLOW_IDX_FN, NOLEAD_FN, NOLEAD_IDX_FN );
 	}
 	catch ( string ex )
 	{

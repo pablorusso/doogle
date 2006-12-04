@@ -49,6 +49,29 @@ ArchivoLexico::ArchivoLexico( std::string nombre, int modo )
 }
 
 //METODOS-FUNCIONALIDAD
+LexicoData *ArchivoLexico::buscarTerminoImpl( string word, LexicoData &foundData, long minimo, long maximo )
+{
+	if ( minimo > maximo )
+		return NULL;
+
+	int posToRead = ( maximo + minimo ) / 2;
+	leerPosicion( posToRead, foundData );
+
+	if ( foundData.termino == word )
+		return &foundData;
+	else
+	{
+		if ( word > foundData.termino )
+			return buscarTerminoImpl( word, foundData, posToRead+1, maximo );
+		return buscarTerminoImpl( word, foundData, minimo, posToRead-1 );
+	}
+}
+
+LexicoData *ArchivoLexico::buscarTermino( string word, LexicoData &foundData )
+{
+	return buscarTerminoImpl( word, foundData, 0, _cantRegistros-1 );
+}
+
 long ArchivoLexico::posicionLogicaAReal( long posicion )
 {
 	if ( posicion < 0 || posicion > _cantRegistros )
@@ -121,6 +144,8 @@ bool ArchivoLexico::leer( LexicoData& data )
 	if ( posicionActual != _posicionSecuencial )
 		_fstream.seekg ( posicionLogicaAReal( _posicionSecuencial ), ios::beg );
 
+	if ( this->fin() ) return false;
+
 	leerImpl( data );
 
 	_posicionSecuencial = _fstream.tellg();
@@ -129,7 +154,7 @@ bool ArchivoLexico::leer( LexicoData& data )
 
 bool ArchivoLexico::fin()
 {
-	return _fstream.eof ();
+	return _fstream.eof() || _cantRegistros == 0;
 }
 
 void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems )

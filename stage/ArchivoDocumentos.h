@@ -23,6 +23,7 @@ class ArchivoDocumentos
 		void validarModo( int modoBuscado );
 		int  escribirImpl( const DocumentData data );
 		void leerImpl( DocumentData& data );
+		DocumentData *buscarPorIdImpl( int docId, DocumentData &foundData, long minimo, long maximo );
 	public:
         ArchivoDocumentos( std::string nombre, std::string nombreIdx, int modo );
 
@@ -33,6 +34,7 @@ class ArchivoDocumentos
 		int  escribir( const DocumentData data );
         bool fin();
 
+		DocumentData *buscarPorId( int docId, DocumentData &foundData );
 		long size();
 
         ~ArchivoDocumentos();

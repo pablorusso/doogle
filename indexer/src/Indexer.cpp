@@ -20,7 +20,7 @@ struct CantTermsComparer
 
 Indexer::Indexer( string targetFolder )
 {
-	_targetFolder = targetFolder + "/";
+	_targetFolder = targetFolder;
 
 	remove( lexicalFileName().c_str() );
 	remove( documentsFileName().c_str() );
@@ -39,11 +39,11 @@ Indexer::Indexer( string targetFolder )
 
 string Indexer::documentsFileName()
 {
-	return _targetFolder + "documents.dat";
+	return _targetFolder + DOC_FN;
 }
 string Indexer::documentsIdxFileName()
 {
-	return _targetFolder + "documents.idx";
+	return _targetFolder + DOC_IDX_FN;
 }
 string Indexer::docLexFileName()
 {
@@ -55,31 +55,31 @@ string Indexer::docLexIdxFileName()
 }
 string Indexer::lexicalFileName()
 {
-	return _targetFolder + "lexical.dat";
+	return _targetFolder + LEX_FN;
 }
 string Indexer::leaderFileName()
 {
-	return _targetFolder + "leaders.dat";
+	return _targetFolder + LEAD_FN;
 }
 string Indexer::leaderIdxFileName()
 {
-	return _targetFolder + "leaders.idx";
+	return _targetFolder + LEAD_IDX_FN;
 }
 string Indexer::followersFileName()
 {
-	return _targetFolder + "followers.dat";
+	return _targetFolder + FOLLOW_FN;
 }
 string Indexer::followersIdxFileName()
 {
-	return _targetFolder + "followers.idx";
+	return _targetFolder + FOLLOW_IDX_FN;
 }
 string Indexer::noLeaderFileName()
 {
-	return _targetFolder + "noLeader.dat";
+	return _targetFolder + NOLEAD_FN;
 }
 string Indexer::noLeaderIdxFileName()
 {
-	return _targetFolder + "noLeader.idx";
+	return _targetFolder + NOLEAD_IDX_FN;
 }
 
 float Indexer::deltaCosineForEqual()
@@ -116,32 +116,32 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 	docLex->leer( data );
 	while ( !docLex->fin() )
 	{
-		bool isFollower = false; float lessRank  = 2;
+		bool isFollower = false; float lessRank = -1;
 		int bestLeaderId = -1;
 
 		map< int, DocLexicoData >::iterator curr = leaders.begin();
 		while ( curr != leaders.end() && ! isFollower )
 		{
-			DocLexicoData itemLeader = static_cast< DocLexicoData >( curr->second );
+			DocLexicoData *itemLeader = static_cast< DocLexicoData *>( &curr->second );
 
 			// Comparo usando el ranking del coseno el documento con cada lider
-			double rank = MathIndex::cosineRank( itemLeader.terminos, data.terminos, MathIndex::norm( itemLeader.terminos ), MathIndex::norm( data.terminos ) );
-			if ( rank <= deltaCosineForEqual() )
+			double rank = MathIndex::cosineRank( itemLeader->terminos, data.terminos, MathIndex::norm( itemLeader->terminos ), MathIndex::norm( data.terminos ) );
+			if ( rank >= deltaCosineForEqual() )
 			{
 				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
 				followers->escribir( data );
 
 				long offset = followers->ultimaPosicionEscrita();
-				itemLeader.seguidores[ data.id ] = offset;
+				itemLeader->seguidores[ data.id ] = offset;
 				isFollower = true;
 			}
 			else
 			{
 				// Si no es tan bueno, me fijo si al menos es el mejor que encontre y me lo guardo
-				if ( rank < lessRank )
+				if ( rank > lessRank )
 				{
 					lessRank = rank;
-					bestLeaderId = itemLeader.id;
+					bestLeaderId = itemLeader->id;
 				}
 			}
 
@@ -184,7 +184,6 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 	while ( curr != leaders.end() )
 	{
 		DocLexicoData *itemLeader = static_cast< DocLexicoData *>( &(curr->second) );
-		cout << endl << endl << "CANT SEG " << itemLeader->seguidores.size();
 		aLeaders->escribir( *itemLeader );
 		++curr;
 	}

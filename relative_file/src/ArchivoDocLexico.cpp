@@ -227,6 +227,8 @@ bool ArchivoDocLexico::leer( DocLexicoData& data )
 	if ( posicionActual != _posicionSecuencial )
 		_fstreamIdx.seekg (  _posicionSecuencial, ios::beg );
 
+	if ( this->fin() ) return false;
+
 	leerImpl( data );
 
 	_posicionSecuencial = _fstreamIdx.tellg();
@@ -235,7 +237,7 @@ bool ArchivoDocLexico::leer( DocLexicoData& data )
 
 bool ArchivoDocLexico::fin()
 {
-	return _fstreamIdx.eof ();
+	return _fstreamIdx.eof ()  || _cantRegistros == 0;
 }
 
 ArchivoDocLexico::~ArchivoDocLexico()
