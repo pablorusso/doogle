@@ -157,7 +157,7 @@ bool ArchivoLexico::fin()
 	return _fstream.eof() || _cantRegistros == 0;
 }
 
-void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems )
+void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems, ArchivoLexico *stopWords )
 {
 	int nextId = _cantRegistros+1;
 	LexicoData data;
@@ -171,6 +171,8 @@ void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPa
 	{
 		std::string word = static_cast< std::string >( curr->first );
 		int peso = static_cast< int >( curr->second );
+
+
 
 		if ( data.termino == word )
 		{
@@ -190,14 +192,23 @@ void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPa
 			}
 			else
 			{
-				LexicoData newData;
-				newData.id = nextId;
-				newData.termino = word;
-				tempLexico.escribir( newData );
+				bool isFound = false;
+				if ( stopWords )
+				{
+					LexicoData found;
+					isFound = stopWords->buscarTermino( word, found ) != NULL;
+				}
 
-				mergedItems[ newData.id ] = peso;
+				if ( !isFound )
+				{
+					LexicoData newData;
+					newData.id = nextId;
+					newData.termino = word;
+					tempLexico.escribir( newData );
+					mergedItems[ newData.id ] = peso;
+					nextId++;
+				}
 
-				nextId++;
 				++curr;
 			}
 		}
@@ -213,13 +224,24 @@ void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPa
 	{
 		std::string word = static_cast< std::string >( curr->first );
 		int peso = static_cast< int >( curr->second );
-		LexicoData newData;
-		newData.id = nextId;
-		newData.termino = word;
-		tempLexico.escribir( newData );
 
-		mergedItems[ newData.id ] = peso;
-		nextId++;
+		bool isFound = false;
+		if ( stopWords )
+		{
+			LexicoData found;
+			isFound = stopWords->buscarTermino( word, found ) != NULL;
+		}
+
+		if ( !isFound )
+		{
+			LexicoData newData;
+			newData.id = nextId;
+			newData.termino = word;
+			tempLexico.escribir( newData );
+			mergedItems[ newData.id ] = peso;
+			nextId++;
+		}
+
 		++curr;
 	}
 }
