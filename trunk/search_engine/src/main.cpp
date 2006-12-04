@@ -24,8 +24,8 @@ struct my_msgbuf
 
 void usage()
 {
-	cerr <<	"usage: search_engine [type] [method] [indexerOutputPath] [consulta]" << endl;
-	cerr << "       ex: search_engine 2 all /home/pablo/facultad/output t1" << endl;
+	cerr <<	"usage: search_engine [type] [method] [pathToMsgFiles] [indexerOutputPath] [consulta]" << endl;
+	cerr << "       ex: search_engine 2 all /home/pablo/facultad/datos/doogle/www/lib /home/pablo/facultad/output" << endl;
 	cerr << "       [type]   1=consola 2=cola de mensajes" << endl;
 	cerr << "       [method] lead=lideres all=todos" << endl;
 	::exit( 1 );
@@ -99,25 +99,31 @@ int useMsgQueue( int argc, char* argv[] )
 {
 	string method;
 	string indexFolder;
-	if ( argc != 4 )
+	string pathToMsg;
+	if ( argc != 5 )
 		usage();
 	else
 	{
 		method = argv[2];
-		indexFolder = argv[3];
+
+		pathToMsg = argv[3];
+		if ( pathToMsg[ pathToMsg.length()-1 ] != '/' )
+			pathToMsg = pathToMsg + "/";
+
+		indexFolder = argv[4];
 	}
 	struct my_msgbuf buf;
 
-	int msqCGItoSearchid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
-	int msqSearchToCGIid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_search_cgi" );
+	int msqCGItoSearchid = createChannel( pathToMsg + "mq_cgi_search" );
+	int msqSearchToCGIid = createChannel( pathToMsg + "mq_search_cgi" );
 	msgctl(msqCGItoSearchid, IPC_RMID, NULL);
 	msgctl(msqSearchToCGIid, IPC_RMID, NULL);
 
 	cout << endl << "Creando canal cgi a search " ;
-	msqCGItoSearchid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
+	msqCGItoSearchid = createChannel( pathToMsg + "mq_cgi_search" );
 	cout << endl << "creado el canal: " << msqCGItoSearchid;
 	cout << endl << "Creando canal search a cgi " ;
-	msqSearchToCGIid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_search_cgi" );
+	msqSearchToCGIid = createChannel( pathToMsg + "mq_search_cgi" );
 	cout << endl << "creado el canal: " << msqSearchToCGIid;
 	cout << endl << "Escuchando...";
 	cout << std::flush;
@@ -200,16 +206,16 @@ int useMsgQueue( int argc, char* argv[] )
 
 int useConsole( int argc, char* argv[] )
 {
-	if ( argc < 5 )
+	if ( argc < 6 )
 		usage();
 
 	string method = argv[2];
 
 	string indexFolder;
-	indexFolder = argv[3];
+	indexFolder = argv[4];
 
 	string word = "";
-	for( int i = 4; i < argc; i++ )
+	for( int i = 5; i < argc; i++ )
 	{
 		if ( word.size() > 0 ) word += " ";
 		word += argv[i];
@@ -237,7 +243,7 @@ int useConsole( int argc, char* argv[] )
 
 int main( int argc, char* argv[] )
 {
-	if ( argc < 3 ) usage();
+	if ( argc < 5 ) usage();
 
 	string type = argv[1];
 	if ( type == "1" )

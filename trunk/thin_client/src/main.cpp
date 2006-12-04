@@ -62,8 +62,8 @@ int main(int argc, char* argv[])
 	string method = cgi.GetValue( name );
 	bool useLeader = method.size() != 0;
 
-	int msqCGItoSearchid = openChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
-	int msqSearchToCGIid = openChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_search_cgi" );
+	int msqCGItoSearchid = openChannel( "mq_cgi_search" );
+	int msqSearchToCGIid = openChannel( "mq_search_cgi" );
 
 	for( uint i = 0; i < value.length(); i++ )
 	{
