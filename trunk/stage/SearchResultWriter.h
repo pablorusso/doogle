@@ -17,8 +17,9 @@ class SearchResultWriter
 		vector<string> _docs;
 
 		string showMessage( string msg );
-		string showItem( string docPath, string docTitle, string docDesc, string docSize );
+		string showItem( string docPath, string docTitle );
 		string processLine( string str, string word, string qty, string version );
+		int splitString(const string& input, const string& delimiter, vector<string>& results, bool includeEmpties );
 	public:
 		SearchResultWriter( string &word, string &errorMsg, vector<string> &docs );
 		virtual ~SearchResultWriter();
