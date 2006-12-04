@@ -20,6 +20,7 @@ class ArchivoLexico
 		void validarModo( int modoBuscado );
 		int  escribirImpl( const LexicoData data );
 		void leerImpl( LexicoData& data );
+		LexicoData *buscarTerminoImpl( string word, LexicoData &foundData, long minimo, long maximo );
 	public:
         ArchivoLexico( std::string nombre, int modo );
 
@@ -31,6 +32,7 @@ class ArchivoLexico
         bool fin();
 
 		void mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems );
+		LexicoData *buscarTermino( string word, LexicoData &foundData );
         ~ArchivoLexico();
 };
 

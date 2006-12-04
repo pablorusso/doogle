@@ -32,7 +32,7 @@ class Indexer
 		void buildLexical( string path, ArchivoDocLexico *documentLexico );
 		void buildLeaders( ArchivoDocLexico *docLex );
 		void sortByQuantity();
-	public:
+
 		string documentsFileName();
 		string documentsIdxFileName();
 		string docLexFileName();
@@ -44,7 +44,7 @@ class Indexer
 		string followersIdxFileName();
 		string noLeaderFileName();
 		string noLeaderIdxFileName();
-
+	public:
 		Indexer( string targetFolder );
 		void buildIndex( string path );
 		~Indexer();

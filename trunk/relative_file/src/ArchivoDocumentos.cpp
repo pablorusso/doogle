@@ -194,15 +194,40 @@ bool ArchivoDocumentos::leer( DocumentData& data )
 	if ( posicionActual != _posicionSecuencial )
 		_fstreamIdx.seekg (  _posicionSecuencial, ios::beg );
 
+	if ( this->fin() ) return false;
+
 	leerImpl( data );
 
 	_posicionSecuencial = _fstreamIdx.tellg();
 	return !this->fin();
 }
 
+DocumentData *ArchivoDocumentos::buscarPorIdImpl( int docId, DocumentData &foundData, long minimo, long maximo )
+{
+	if ( minimo > maximo )
+		return NULL;
+
+	int posToRead = ( maximo + minimo ) / 2;
+	leerPosicion( posToRead, foundData );
+
+	if ( foundData.id == docId )
+		return &foundData;
+	else
+	{
+		if ( docId > foundData.id )
+			return buscarPorIdImpl( docId, foundData, posToRead+1, maximo );
+		return buscarPorIdImpl( docId, foundData, minimo, posToRead-1 );
+	}
+}
+
+DocumentData *ArchivoDocumentos::buscarPorId( int docId, DocumentData &foundData )
+{
+	return buscarPorIdImpl( docId, foundData, 0, _cantRegistros-1 );
+}
+
 bool ArchivoDocumentos::fin()
 {
-	return _fstreamIdx.eof();
+	return _fstreamIdx.eof()  || _cantRegistros == 0;
 }
 
 long ArchivoDocumentos::size()

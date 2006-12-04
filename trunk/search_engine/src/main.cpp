@@ -10,6 +10,10 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#include "Query.h"
+#include "QueryParser.h"
+#include "Search.h"
+
 using namespace std;
 
 struct my_msgbuf
@@ -17,6 +21,14 @@ struct my_msgbuf
 	long mtype;
 	char mtext;
 };
+
+void usage()
+{
+	cerr <<	"usage: search_engine [type] [indexerOutputPath] [consulta]" << endl;
+	cerr << "ex: search_engine 1 /home/pablo/facultad/output t1" << endl;
+	cerr << "type: 1- consola 2- cola de mensajes" << endl;
+	::exit( 1 );
+}
 
 int createChannel( string path )
 {
@@ -48,39 +60,43 @@ void destroyChannel( int chanId )
 	}
 }
 
-void procesar( string queryString, vector< string > &result )
+bool procesar( Search *search, string queryString, vector< string > &result )
 {
-		/*
+	bool isOk;
 	vector<Query *> query;
-	vector<string>  docs;
-
 	try
 	{
-		QueryParser::Parse( value, query );
+		QueryParser::Parse( queryString, query );
+		search->doSearch( query, result );
+		isOk = true;
 	}
 	catch( InvalidTokenException ex )
 	{
-		errorMsg = ex.what();
+		result.push_back( ex.what() );
+		isOk = false;
+	}
+	catch( string msg )
+	{
+		result.push_back( msg );
+		isOk = false;
 	}
 
-	cout << "Content-type: text/html" << endl << endl << endl;
-	try
-	{
-		SearchResultWriter writer( value, errorMsg, docs );
-		cout << writer.getResult();
-	}
-	catch( ... )
-	{
-		showError( "Error al mostrar el html con los resultados." );
-	}
-	*/
+	// libero el vector de queries
+	vector<Query*>::iterator vecIt;
+	for( vecIt = query.begin(); vecIt != query.end(); vecIt++ )
+		delete *vecIt;
 
-	result.push_back( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
-	result.push_back( "/home/pablo/facultad/datos/doogle/www/lib/mq_search_cgi" );
+	return isOk;
 }
 
-int main( int argc, char* argv[] )
+int useMsgQueue( int argc, char* argv[] )
 {
+	string indexFolder;
+	if ( argc != 3 )
+		usage();
+	else
+		indexFolder = argv[2];
+
 	struct my_msgbuf buf;
 
 	int msqCGItoSearchid = createChannel( "/home/pablo/facultad/datos/doogle/www/lib/mq_cgi_search" );
@@ -97,7 +113,9 @@ int main( int argc, char* argv[] )
 	cout << endl << "Escuchando...";
 	cout << std::flush;
 
+	Search *search = new Search( indexFolder );
 	string temp = "";
+
 	for ( ; ; )  // Nunca termina
 	{
 		if ( msgrcv( msqCGItoSearchid, (struct msgbuf *)&buf, sizeof(buf), 0, 0) == -1 )
@@ -114,11 +132,11 @@ int main( int argc, char* argv[] )
 			cout << endl << "Palabra completa: " << temp ;
 
 			vector<string> documentos;
-			procesar( temp, documentos );
+			bool isOk = procesar( search, temp, documentos );
 
 			struct my_msgbuf codigoInicial;
 			codigoInicial.mtype = 1;
-			codigoInicial.mtext = '1'; // > 0 todo OK, < 0, el mensaje es un error
+			codigoInicial.mtext = isOk ? '1' : '2'; // 1 OK, 2 error
 			if ( msgsnd( msqSearchToCGIid, (struct msgbuf *)&codigoInicial, sizeof(codigoInicial), 0) == -1 )
 				perror("msgsnd");
 
@@ -155,7 +173,56 @@ int main( int argc, char* argv[] )
 		}
 	}
 
+	delete search;
 	destroyChannel( msqCGItoSearchid );
 	destroyChannel( msqSearchToCGIid );
 	return 0;
+}
+
+
+
+int useConsole( int argc, char* argv[] )
+{
+	if ( argc < 4 )
+		usage();
+
+	string indexFolder;
+	indexFolder = argv[2];
+
+	string word = "";
+	for( int i = 3; i < argc; i++ )
+	{
+		if ( word.size() > 0 ) word += " ";
+		word += argv[i];
+	}
+
+	vector<string> documentos;
+
+	cout << endl << "comienza la busqueda!" << endl;
+
+	Search *search = new Search( indexFolder );
+	bool isOk = procesar( search, word, documentos );
+	if ( !isOk )
+		cout << "hubo un error!" << endl;
+
+	vector<string>::iterator docIt;
+	for( docIt = documentos.begin(); docIt != documentos.end(); docIt++ )
+		cout << endl << "encontre: " << static_cast< string > ( *docIt );
+
+	cout << endl << "fin de la busqueda" << endl;
+
+	delete search;
+	return 0;
+}
+
+
+int main( int argc, char* argv[] )
+{
+	if ( argc < 2 ) usage();
+
+	string type = argv[1];
+	if ( type == "1" )
+		useConsole( argc, argv );
+	else
+		useMsgQueue( argc, argv );
 }
