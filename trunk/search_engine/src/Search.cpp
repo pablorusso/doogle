@@ -9,7 +9,7 @@ Search::Search( string indexFolder )
 		_indexFolder = _indexFolder + "/";
 }
 
-double Search::doCosine( map<int, int> &include, map<int, int> &exclude, LexicalPair &lexicoDocumento, LexicalPair &queryPair  )
+double Search::doCosine( map<int, int> &include, map<int, int> &exclude, LexicalPair &lexicoDocumento, LexicalPair &queryPair, double normaDoc  )
 {
 	bool found = false;
 	map<int, int>::iterator excludeIt = exclude.begin();
@@ -31,7 +31,7 @@ double Search::doCosine( map<int, int> &include, map<int, int> &exclude, Lexical
 	if ( !found ) return -1;
 
 	if ( queryPair.size() == 0 ) return 1;
-	return MathIndex::cosineRank( lexicoDocumento, queryPair, MathIndex::norm( lexicoDocumento ), MathIndex::norm( queryPair ) );
+	return MathIndex::cosineRank( lexicoDocumento, queryPair, normaDoc, MathIndex::norm( queryPair ) );
 }
 
 void Search::doSearch( vector<Query *> query,  vector< string > &result )
@@ -95,7 +95,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		lideres->comenzarLectura();
 		while( lideres->leer( leaderData ) )
 		{
-			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair );
+			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair, leaderData.norma );
 			if ( rankCos > bestCos )
 			{
 				bestCos = rankCos;
@@ -121,7 +121,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 				int offset = static_cast< int >( currSeg->second );
 				seguidores->leerOffset( offset, seguidorData );
 
-				double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair );
+				double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair, seguidorData.norma );
 				if ( rankCos > 0 )
 					encontrados.insert( multimap<double, int>::value_type( 1-rankCos, seguidorData.id ) );
 				++currSeg;
@@ -138,7 +138,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		noLideres->comenzarLectura();
 		while( noLideres->leer( noLiderData ) )
 		{
-			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair );
+			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair, noLiderData.norma );
 			if ( rankCos > 0 )
 				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, noLiderData.id ) );
 		}
@@ -216,7 +216,7 @@ void Search::doSearchAll( vector<Query *> query,  vector< string > &result )
 		lideres->comenzarLectura();
 		while( lideres->leer( leaderData ) )
 		{
-			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair );
+			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair, leaderData.norma );
 			if ( rankCos > 0 )
 				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, leaderData.id ) );
 		}
@@ -230,7 +230,7 @@ void Search::doSearchAll( vector<Query *> query,  vector< string > &result )
 		seguidores->comenzarLectura();
 		while( seguidores->leer( seguidorData ) )
 		{
-			double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair );
+			double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair, seguidorData.norma );
 			if ( rankCos > 0 )
 				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, seguidorData.id ) );
 		}
@@ -244,7 +244,7 @@ void Search::doSearchAll( vector<Query *> query,  vector< string > &result )
 		noLideres->comenzarLectura();
 		while( noLideres->leer( noLiderData ) )
 		{
-			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair );
+			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair, noLiderData.norma );
 			if ( rankCos > 0 )
 				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, noLiderData.id ) );
 		}

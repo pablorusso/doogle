@@ -10,8 +10,6 @@ class DocumentData
 	public:
 		int 		id;
     	std::string ruta;
-        double      norma;
-        int        cantTermDistintos;
 
 		DocumentData();
 };

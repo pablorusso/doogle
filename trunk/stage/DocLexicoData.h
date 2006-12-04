@@ -16,6 +16,7 @@ class DocLexicoData
 		int  id;
 		Seguidores  seguidores;
 		LexicalPair terminos;
+		double norma;
 
 		DocLexicoData();
 };
