@@ -74,8 +74,8 @@
 								<input type=hidden name=hl value="es">
 								<input type=text name=bsearch size=41 maxlength=2048 value="$WORD$" title="Busqueda">
 								<font size=-1>
-								<input type=submit name="btnD" value="Busqueda">
-
+								<input type=submit name="btnD" value="Busqueda"><br><br>
+								<input type="checkbox" name="cmethod" value="cmethod" checked>Usar solo lideres<br>
 								<span id=hf></span>
 								</font>
 							</td>
@@ -110,7 +110,8 @@
 					<input type=hidden name=hl value="es">
 					<input type=text name=bsearch size=31 maxlength=2048 value="$WORD$" title="Busqueda">
 					<font size=-1>
-					<input type=submit name="btnD" value="Busqueda">
+					<input type=submit name="btnD" value="Busqueda"><br><br>
+							<input type="checkbox" name="cmethod" value="cmethod" checked>Usar solo lideres<br>
 					</font>
 				</td></tr>
 				</form>

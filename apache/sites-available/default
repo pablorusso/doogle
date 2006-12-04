@@ -58,4 +58,12 @@ NameVirtualHost *
 	Order allow,deny
 	allow from all
     </Directory>
+
+    Alias /home/pablo/facultad/input "/home/pablo/facultad/input"
+    <Directory "/home/pablo/facultad/input">
+	Options Indexes FollowSymLinks MultiViews
+	AllowOverride None
+	Order allow,deny
+	allow from all
+    </Directory>
 </VirtualHost>

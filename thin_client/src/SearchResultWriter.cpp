@@ -6,7 +6,7 @@ SearchResultWriter::SearchResultWriter( string &word, string &errorMsg, vector<s
 	_word = word;
 	_errorMsg = errorMsg;
 	_docs = docs;
-	_version = "0.5.0";
+	_version = "1.0.0";
 
 	_resTemplate.open( "result.template" );
 }

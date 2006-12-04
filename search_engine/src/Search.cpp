@@ -44,47 +44,47 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 	multimap<double, int> encontrados;
 
 	// Construye el pair idTermino, peso a partir de la consulta
-	// TODO: eliminar los stops words
 	LexicoData lexData;
 	string lexFN = _indexFolder + LEX_FN;
 	ArchivoLexico *lexico = new ArchivoLexico( lexFN, LEER );
+
+	string stopFN = _indexFolder + LEX_STOP_FN;
+	ArchivoLexico *stop = new ArchivoLexico( stopFN, LEER );
+
 	vector<Query *>::iterator queryIt;
 	for( queryIt = query.begin(); queryIt != query.end(); queryIt++ )
 	{
 		Query *pQ = *queryIt;
 
-		bool found = lexico->buscarTermino( pQ->getWord(), lexData ) != NULL;
-		int id = -1;
-		if ( found )
-			id = lexData.id;
-
-		if ( pQ->mustBeExcluded() )
+		bool isStop = stop->buscarTermino( pQ->getWord(), lexData ) != NULL;
+		if ( !isStop )
 		{
-			exclude[ id ] = id;
-			mustExcludeNotInLex = true;
-		}
-		else
-		{
-			if ( pQ->mustBeIncluded() )
-				include[ id ] = id;
-
+			bool found = lexico->buscarTermino( pQ->getWord(), lexData ) != NULL;
+			int id = -1;
 			if ( found )
-				queryPair[ id ] = pQ->getWeight();
-		}
-/*		}
-		else
-		{
-			if ( pQ->mustBeIncluded() )
-				mustIncludeNotInLex = true;
+				id = lexData.id;
+
 			if ( pQ->mustBeExcluded() )
+			{
+				exclude[ id ] = id;
 				mustExcludeNotInLex = true;
-		}*/
+			}
+			else
+			{
+				if ( pQ->mustBeIncluded() )
+					include[ id ] = id;
+
+				if ( found )
+					queryPair[ id ] = pQ->getWeight();
+			}
+		}
 	}
+	delete stop;
 	delete lexico;
 
 	if ( queryPair.size() > 0 || mustExcludeNotInLex )
 	{
-		double bestCos = 0;
+		double bestCos = -1;
 		DocLexicoData bestLeaderData;
 		DocLexicoData leaderData;
 
@@ -96,7 +96,7 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		while( lideres->leer( leaderData ) )
 		{
 			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair );
-			if ( rankCos >= bestCos )
+			if ( rankCos > bestCos )
 			{
 				bestCos = rankCos;
 				bestLeaderData = leaderData; // debe faltar el constructor de copia
@@ -105,9 +105,10 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 		delete lideres;
 
 		// Si hay algun lider bueno, entonces rankeo sus seguidores
-		if ( bestCos != 0 )
+		if ( bestCos >= 0 )
 		{
-			encontrados.insert( multimap<double, int>::value_type( 1-bestCos, bestLeaderData.id ) );
+			if ( bestCos > 0 )
+				encontrados.insert( multimap<double, int>::value_type( 1-bestCos, bestLeaderData.id ) );
 
 			DocLexicoData seguidorData;
 
@@ -127,11 +128,10 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 			}
 			delete seguidores;
 		}
-		/*else { */
+
 
 		// Busco en los documentos sin lideres
 		DocLexicoData noLiderData;
-
 		string noLiderFN    = _indexFolder + NOLEAD_FN;
 		string noLiderIdxFN = _indexFolder + NOLEAD_IDX_FN;
 		ArchivoDocLexico *noLideres = new ArchivoDocLexico( noLiderFN, noLiderIdxFN, LEER );
@@ -159,3 +159,109 @@ void Search::doSearch( vector<Query *> query,  vector< string > &result )
 	}
 }
 
+void Search::doSearchAll( vector<Query *> query,  vector< string > &result )
+{
+	bool mustExcludeNotInLex = false;
+	LexicalPair queryPair;
+	map<int, int> include;
+	map<int, int> exclude;
+	multimap<double, int> encontrados;
+
+	// Construye el pair idTermino, peso a partir de la consulta
+	LexicoData lexData;
+	string lexFN = _indexFolder + LEX_FN;
+	ArchivoLexico *lexico = new ArchivoLexico( lexFN, LEER );
+
+	string stopFN = _indexFolder + LEX_STOP_FN;
+	ArchivoLexico *stop = new ArchivoLexico( stopFN, LEER );
+
+	vector<Query *>::iterator queryIt;
+	for( queryIt = query.begin(); queryIt != query.end(); queryIt++ )
+	{
+		Query *pQ = *queryIt;
+
+		bool isStop = stop->buscarTermino( pQ->getWord(), lexData ) != NULL;
+		if ( !isStop )
+		{
+			bool found = lexico->buscarTermino( pQ->getWord(), lexData ) != NULL;
+			int id = -1;
+			if ( found )
+				id = lexData.id;
+
+			if ( pQ->mustBeExcluded() )
+			{
+				exclude[ id ] = id;
+				mustExcludeNotInLex = true;
+			}
+			else
+			{
+				if ( pQ->mustBeIncluded() )
+					include[ id ] = id;
+
+				if ( found )
+					queryPair[ id ] = pQ->getWeight();
+			}
+		}
+	}
+	delete stop;
+	delete lexico;
+
+	if ( queryPair.size() > 0 || mustExcludeNotInLex )
+	{
+		// Rankea los lideres
+		DocLexicoData leaderData;
+		string leaderFN    = _indexFolder + LEAD_FN;
+		string leaderIdxFN = _indexFolder + LEAD_IDX_FN;
+		ArchivoDocLexico *lideres = new ArchivoDocLexico( leaderFN, leaderIdxFN, LEER );
+		lideres->comenzarLectura();
+		while( lideres->leer( leaderData ) )
+		{
+			double rankCos = doCosine( include, exclude, leaderData.terminos, queryPair );
+			if ( rankCos > 0 )
+				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, leaderData.id ) );
+		}
+		delete lideres;
+
+		// Rankea los seguidores
+		DocLexicoData seguidorData;
+		string seguidorFN    = _indexFolder + FOLLOW_FN;
+		string seguidorIdxFN = _indexFolder + FOLLOW_IDX_FN;
+		ArchivoDocLexico *seguidores = new ArchivoDocLexico( seguidorFN, seguidorIdxFN, LEER );
+		seguidores->comenzarLectura();
+		while( seguidores->leer( seguidorData ) )
+		{
+			double rankCos = doCosine( include, exclude, seguidorData.terminos, queryPair );
+			if ( rankCos > 0 )
+				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, seguidorData.id ) );
+		}
+		delete seguidores;
+
+		// Busco en los documentos sin lideres
+		DocLexicoData noLiderData;
+		string noLiderFN    = _indexFolder + NOLEAD_FN;
+		string noLiderIdxFN = _indexFolder + NOLEAD_IDX_FN;
+		ArchivoDocLexico *noLideres = new ArchivoDocLexico( noLiderFN, noLiderIdxFN, LEER );
+		noLideres->comenzarLectura();
+		while( noLideres->leer( noLiderData ) )
+		{
+			double rankCos = doCosine( include, exclude, noLiderData.terminos, queryPair );
+			if ( rankCos > 0 )
+				encontrados.insert( multimap<double, int>::value_type( 1-rankCos, noLiderData.id ) );
+		}
+		delete noLideres;
+
+		// Armo la salida
+		DocumentData docData;
+		string docFN    = _indexFolder + DOC_FN;
+		string docIdxFN = _indexFolder + DOC_IDX_FN;
+		ArchivoDocumentos *documentos = new ArchivoDocumentos( docFN, docIdxFN, LEER );
+		multimap<double, int>::iterator encIt;
+		for( encIt = encontrados.begin(); encIt != encontrados.end(); encIt++ )
+		{
+			int docId = static_cast< int > ( encIt->second );
+			documentos->buscarPorId( docId, docData );
+			result.push_back( docData.ruta );
+		}
+		delete documentos;
+	}
+}
