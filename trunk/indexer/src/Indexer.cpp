@@ -12,7 +12,7 @@
 
 struct CantTermsComparer
 {
-     bool operator()( const DocLexicoData & a, const DocLexicoData & b )
+     bool operator()( const DocLexicoData &a, const DocLexicoData &b )
      {
           return a.terminos.size() > b.terminos.size();
      }
@@ -98,7 +98,7 @@ int Indexer::fileFilter( const struct dirent *entry )
 
 void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 {
-	long docCount 	  = _document->size();
+	int docCount 	  = _document->size();
 	uint maxLeaders   = ( int ) ceil( sqrt( docCount / 2 ) );
 	uint maxFollowers = docCount - maxLeaders;
 	DocLexicoData data;
@@ -131,14 +131,14 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
 				followers->escribir( data );
 
-				long offset = followers->ultimaPosicionEscrita();
+				int offset = followers->ultimaPosicionEscrita();
 				itemLeader->seguidores[ data.id ] = offset;
 				isFollower = true;
 			}
 			else
 			{
 				// Si no es tan bueno, me fijo si al menos es el mejor que encontre y me lo guardo
-				if ( rank > lessRank )
+				if ( rank > lessRank && itemLeader->seguidores.size() < maxFollowers )
 				{
 					lessRank = rank;
 					bestLeaderId = itemLeader->id;
@@ -149,25 +149,23 @@ void Indexer::buildLeaders( ArchivoDocLexico *docLex )
 		}
 
 
+		// Si no es seguidor natural de nadie
 		if ( ! isFollower )
 		{
-			DocLexicoData *bestLeader = static_cast< DocLexicoData *> ( & (leaders[ bestLeaderId ]) );
-			// Si no es seguidor natural de nadie
-			if ( bestLeader->seguidores.size() < maxFollowers )
-			{
-				// Si el rankeo del coseno es suficientemente bueno, lo considero seguidor sin ver que pasa mas adelante
-				followers->escribir( data );
-
-				long offset = followers->ultimaPosicionEscrita();
-				bestLeader->seguidores[ data.id ] = offset;
-			}
+			// Si aun tengo espacio para liders, lo hago lider
+			if ( leaders.size() < maxLeaders )
+				leaders[ data.id ] = data;
 			else
 			{
-				if ( leaders.size() < maxLeaders )
-					// Si aun tengo espacio para liders, lo hago lider
-					leaders[ data.id ] = data;
+				if ( bestLeaderId != -1 )
+				{
+					DocLexicoData *bestLeader = static_cast< DocLexicoData *> ( & (leaders[ bestLeaderId ]) );
+
+					followers->escribir( data );
+					int offset = followers->ultimaPosicionEscrita();
+					bestLeader->seguidores[ data.id ] = offset;
+				}
 				else
-					// Si no puede ser ni seguidor ni lider, entonces no encaja con nada y lo mando al otro archivo
 					withoutLeader->escribir( data );
 			}
 		}
@@ -224,7 +222,7 @@ void Indexer::sortByQuantity()
 		ArchivoDocLexico *particion = new ArchivoDocLexico( partitionName, partitionIdxName, ESCRIBIR | LEER );
 		vector< DocLexicoData >::iterator curr;
 		for ( curr = memoria.begin(); curr != memoria.end(); curr++ )
-			particion->escribir( static_cast< DocLexicoData >( *curr ) );
+			particion->escribir( static_cast< DocLexicoData &>( *curr ) );
 		delete particion;
 
 		++partId;

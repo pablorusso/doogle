@@ -7,9 +7,9 @@
 using namespace std;
 
 // palabra - peso
-typedef map<std::string, long> WordPair;
+typedef map<std::string, int> WordPair;
 // id - peso
-typedef map<int, long> LexicalPair;
+typedef map<int, int> LexicalPair;
 
 class LexicoData
 {

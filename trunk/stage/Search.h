@@ -16,7 +16,7 @@ class Search
 {
 	private:
 		string _indexFolder;
-		double doCosine( map<int, char> &include, map<int, char> &exclude, LexicalPair &lexicoDocumento, LexicalPair &queryPair  );
+		double doCosine( map<int, int> &include, map<int, int> &exclude, LexicalPair &lexicoDocumento, LexicalPair &queryPair  );
 	public:
 		Search( string indexFolder );
 		void doSearch( vector<Query *> query,  vector< string > &result );

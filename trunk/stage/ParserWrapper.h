@@ -13,7 +13,7 @@ class ParserWrapper
 		ifstream *_xmlFile;
 		XML_Parser _parser;
 		WordPair *_lexico;
-
+		string _fileName;
 		static void charHandler  ( void *userData, const XML_Char *s, int len );
 	public:
 		ParserWrapper( string fileName, WordPair *lexico );

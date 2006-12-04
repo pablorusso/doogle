@@ -15,14 +15,14 @@ void usage()
 void listarDocLexicoData( DocLexicoData dato )
 {
 	cout << "** id: " << dato.id << " - TERMINOS: ";
-	LexicalPair::iterator curr = dato.terminos.begin();
+	/*LexicalPair::iterator curr = dato.terminos.begin();
 	while ( curr != dato.terminos.end() )
 	{
 		int idTermino = static_cast< int >( curr->first );
-		long peso = static_cast< long >( curr->second );
+		int peso = static_cast< int >( curr->second );
 		cout << "(" << idTermino << ", " << peso << ") ";
 		++curr;
-	}
+	}*/
 }
 
 void listarArchivos( string targetFolder, string lexFN, string docFN, string docIdxFN, string liderFN, string liderIdxFN, string seguidorFN, string seguidorIdxFN, string noLiderFN, string noLiderIdxFN )
@@ -69,7 +69,7 @@ void listarArchivos( string targetFolder, string lexFN, string docFN, string doc
 			Seguidores::iterator currSeg = dato3.seguidores.begin();
 			while ( currSeg != dato3.seguidores.end() )
 			{
-   				long offset = static_cast< long >( currSeg->second );
+   				int offset = static_cast< int >( currSeg->second );
 				cout << endl << "-------->Seguidor: ";
 				seguidoresFile->leerOffset( offset, dato4 );
    				listarDocLexicoData( dato4 );

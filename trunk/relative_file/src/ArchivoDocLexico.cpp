@@ -7,10 +7,10 @@ using namespace std;
 
 typedef struct
 {
-	int 		id;
-	int			cantTerminos;
-	int			cantSeguidores;
-    long        offset;
+	int id;
+	int	cantTerminos;
+	int	cantSeguidores;
+    int	offset;
 } IdocLexicoFileReg;
 
 
@@ -66,7 +66,7 @@ ArchivoDocLexico::ArchivoDocLexico( std::string nombre, std::string nombreIdx, i
 }
 
 //METODOS-FUNCIONALIDAD
-long ArchivoDocLexico::posicionLogicaAReal( long posicion )
+int ArchivoDocLexico::posicionLogicaAReal( int posicion )
 {
 	if ( posicion < 0 || posicion > _cantRegistros )
 		throw string ( "La posicion esta fuera del rango permitido" );
@@ -80,47 +80,45 @@ void ArchivoDocLexico::comenzarLectura()
 	_fstreamIdx.seekg( _posicionSecuencial );
 }
 
-int ArchivoDocLexico::escribirImpl( DocLexicoData data )
+int ArchivoDocLexico::escribirImpl( DocLexicoData &data )
 {
 	int newId = data.id <= 0 ? _cantRegistros+1 : data.id;
-	long offset = _fstream.tellp();
-	_lastWrite = offset;
+	int offset = _fstream.tellp();
 
 	// id
 	void *temp = &newId;
 	_fstream.write( static_cast<const char *>( temp ), sizeof( int ) );
 
 	// terminos
-	int idTermino; long peso;
 	LexicalPair::iterator curr = data.terminos.begin();
 	while ( curr != data.terminos.end() )
 	{
-		idTermino = static_cast< int >( curr->first );
+		int idTermino = static_cast< int >( curr->first );
    		temp = &idTermino;
 		_fstream.write( static_cast<const char *>( temp ), sizeof( int ) );
 
-		peso = static_cast< long >( curr->second );
+		int peso = static_cast< int >( curr->second );
    		temp = &peso;
-		_fstream.write( static_cast<const char *>( temp ), sizeof(long) );
+		_fstream.write( static_cast<const char *>( temp ), sizeof(int) );
 		++curr;
 	}
-	// cout << endl << endl << "ID: " << newId << "LIDER CANT SEG WRITE: " << data.seguidores.size();
-	// seguidores
 
-	int idDoc; long offset_seg;
+	// seguidores
 	Seguidores::iterator currSeg = data.seguidores.begin();
 	while ( currSeg != data.seguidores.end() )
 	{
-		idDoc = static_cast< int >( currSeg->first );
+		int idDoc = static_cast< int >( currSeg->first );
    		temp = &idDoc;
 		_fstream.write( static_cast<const char *>( temp ), sizeof(int) );
 
-		offset_seg = static_cast< long >( currSeg->second );
+		int offset_seg = static_cast< int >( currSeg->second );
    		temp = &offset_seg;
-		_fstream.write( static_cast<const char *>( temp ), sizeof(long) );
+		_fstream.write( static_cast<const char *>( temp ), sizeof(int) );
 
 		++currSeg;
 	}
+
+	_lastWrite = _fstreamIdx.tellp();
 
 	// indice
 	void *buffer = malloc( _tamanio );
@@ -142,7 +140,7 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
     _fstreamIdx.read( static_cast<char*>( buffer ), _tamanio );
 	IdocLexicoFileReg * leido = static_cast<IdocLexicoFileReg*>( buffer );
 	data.id 	= leido->id;
-	long offset = leido->offset;
+	int offset = leido->offset;
 	int cantTerminos = leido->cantTerminos;
 	int cantSeguidores = leido->cantSeguidores;
 	delete leido;
@@ -154,41 +152,41 @@ void ArchivoDocLexico::leerImpl( DocLexicoData& data )
 	_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 	// terminos y seguidores
-	int idTermino=0; long peso=0;
 	data.terminos.clear();
 	while ( cantTerminos > 0 )
 	{
+		int idTermino=0; int peso=0;
 		temp = &idTermino;
 		_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 		temp = &peso;
-		_fstream.read( static_cast<char  *>( temp ), sizeof( long ) );
+		_fstream.read( static_cast<char  *>( temp ), sizeof( int ) );
 
 		data.terminos[ idTermino ] = peso;
 		cantTerminos--;
 	}
 
-	int idDoc=0; long offset_seg=0;
 	data.seguidores.clear();
 	while ( cantSeguidores > 0 )
 	{
+		int idDoc=0; int offset_seg=0;
 		temp = &idDoc;
 		_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 		temp = &offset_seg;
-		_fstream.read( static_cast<char *>( temp ), sizeof( long ) );
+		_fstream.read( static_cast<char *>( temp ), sizeof( int ) );
 
 		data.seguidores[ idDoc ] = offset_seg;
 		cantSeguidores--;
 	}
 }
 
-long ArchivoDocLexico::ultimaPosicionEscrita()
+int ArchivoDocLexico::ultimaPosicionEscrita()
 {
 	return _lastWrite;
 }
 
-int ArchivoDocLexico::escribirPosicion( int posicion, DocLexicoData data )
+int ArchivoDocLexico::escribirPosicion( int posicion, DocLexicoData &data )
 {
 	validarModo( ESCRIBIR );
 	_fstreamIdx.seekp ( posicionLogicaAReal( posicion ), ios::beg );
@@ -202,14 +200,14 @@ void ArchivoDocLexico::leerPosicion( int posicion, DocLexicoData& data )
 	leerImpl( data );
 }
 
-void ArchivoDocLexico::leerOffset( long offset, DocLexicoData &data )
+void ArchivoDocLexico::leerOffset( int offset, DocLexicoData &data )
 {
 	validarModo( LEER );
 	_fstreamIdx.seekg ( offset, ios::beg );
 	leerImpl( data );
 }
 
-int ArchivoDocLexico::escribir( const DocLexicoData data )
+int ArchivoDocLexico::escribir( DocLexicoData &data )
 {
 	validarModo( ESCRIBIR );
 
@@ -223,7 +221,7 @@ bool ArchivoDocLexico::leer( DocLexicoData& data )
 {
 	validarModo( LEER );
 
-	long posicionActual = _fstreamIdx.tellg();
+	int posicionActual = _fstreamIdx.tellg();
 	if ( posicionActual != _posicionSecuencial )
 		_fstreamIdx.seekg (  _posicionSecuencial, ios::beg );
 

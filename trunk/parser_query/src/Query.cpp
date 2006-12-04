@@ -3,6 +3,14 @@
 Query::Query( string word, bool included, bool excluded, int weight )
 {
 	_word = word;
+	for( int i = 0; i < _word.length(); i++ )
+	{
+		int asciiCode = ( int ) _word[ i ];
+		if ( asciiCode >= 65 && asciiCode <= 90 )
+			asciiCode += 32;
+		_word[ i ] = ( char ) asciiCode;
+	}
+
 	_includedFlag = included;
 	_excludedFlag = excluded;
 	_weight = weight;

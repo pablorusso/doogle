@@ -2,18 +2,18 @@
 
 double MathIndex::norm( LexicalPair &items )
 {
-	long dummy = 0;
+	int dummy = 0;
 	return norm( items, dummy );
 }
 
-double MathIndex::norm( LexicalPair &items, long &cantTerminos )
+double MathIndex::norm( LexicalPair &items, int &cantTerminos )
 {
-	long pesoTotal = 0;
+	int pesoTotal = 0;
 	cantTerminos = 0;
 	LexicalPair::iterator curr = items.begin();
 	while ( curr != items.end() )
 	{
-		long peso = static_cast< long >( curr->second );
+		int peso = static_cast< int >( curr->second );
 		pesoTotal += peso * peso;
 		cantTerminos++;
 
@@ -27,7 +27,7 @@ double MathIndex::norm( LexicalPair &items, long &cantTerminos )
 double MathIndex::cosineRank( LexicalPair &items1, LexicalPair &items2, double norm1, double norm2 )
 {
 	if ( norm1 == 0 || norm2 == 0 )
-		return 1;
+		return 0;
 
 	double denominador = norm1 * norm2;
 
@@ -41,8 +41,8 @@ double MathIndex::cosineRank( LexicalPair &items1, LexicalPair &items2, double n
 
 		if ( id1 == id2 )
 		{
-			long peso1 = static_cast< long >( it1->second );
-			long peso2 = static_cast< long >( it2->second );
+			int peso1 = static_cast< int >( it1->second );
+			int peso2 = static_cast< int >( it2->second );
 			numerador += peso1 * peso2;
 
 			++it1;

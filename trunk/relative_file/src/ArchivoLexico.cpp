@@ -49,7 +49,7 @@ ArchivoLexico::ArchivoLexico( std::string nombre, int modo )
 }
 
 //METODOS-FUNCIONALIDAD
-LexicoData *ArchivoLexico::buscarTerminoImpl( string word, LexicoData &foundData, long minimo, long maximo )
+LexicoData *ArchivoLexico::buscarTerminoImpl( string word, LexicoData &foundData, int minimo, int maximo )
 {
 	if ( minimo > maximo )
 		return NULL;
@@ -72,7 +72,7 @@ LexicoData *ArchivoLexico::buscarTermino( string word, LexicoData &foundData )
 	return buscarTerminoImpl( word, foundData, 0, _cantRegistros-1 );
 }
 
-long ArchivoLexico::posicionLogicaAReal( long posicion )
+int ArchivoLexico::posicionLogicaAReal( int posicion )
 {
 	if ( posicion < 0 || posicion > _cantRegistros )
 		throw string ( "La posicion esta fuera del rango permitido" );
@@ -86,7 +86,7 @@ void ArchivoLexico::comenzarLectura()
 	_fstream.seekg( _posicionSecuencial );
 }
 
-int ArchivoLexico::escribirImpl( const LexicoData data )
+int ArchivoLexico::escribirImpl( LexicoData &data )
 {
 	void *buffer = malloc( _tamanio );
 
@@ -114,7 +114,7 @@ void ArchivoLexico::leerImpl( LexicoData& data )
 	delete datoLeido;
 }
 
-int ArchivoLexico::escribirPosicion( int posicion, const LexicoData data )
+int ArchivoLexico::escribirPosicion( int posicion, LexicoData &data )
 {
 	validarModo( ESCRIBIR );
 	_fstream.seekp ( posicionLogicaAReal( posicion ), ios::beg );
@@ -128,7 +128,7 @@ void ArchivoLexico::leerPosicion( int posicion, LexicoData& data )
 	leerImpl( data );
 }
 
-int ArchivoLexico::escribir( const LexicoData data )
+int ArchivoLexico::escribir( LexicoData &data )
 {
 	validarModo( ESCRIBIR );
 
@@ -140,7 +140,7 @@ bool ArchivoLexico::leer( LexicoData& data )
 {
 	validarModo( LEER );
 
-	long posicionActual = _fstream.tellg();
+	int posicionActual = _fstream.tellg();
 	if ( posicionActual != _posicionSecuencial )
 		_fstream.seekg ( posicionLogicaAReal( _posicionSecuencial ), ios::beg );
 
@@ -159,7 +159,7 @@ bool ArchivoLexico::fin()
 
 void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPair &mergedItems )
 {
-	long nextId = _cantRegistros+1;
+	int nextId = _cantRegistros+1;
 	LexicoData data;
 	ArchivoLexico tempLexico( newLexName, ESCRIBIR );
 
@@ -170,7 +170,7 @@ void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPa
 	while ( !fin() && curr != words.end() )
 	{
 		std::string word = static_cast< std::string >( curr->first );
-		long peso = static_cast< long >( curr->second );
+		int peso = static_cast< int >( curr->second );
 
 		if ( data.termino == word )
 		{
@@ -212,7 +212,7 @@ void ArchivoLexico::mergeWith( std::string newLexName, WordPair words, LexicalPa
 	while ( curr != words.end() )
 	{
 		std::string word = static_cast< std::string >( curr->first );
-		long peso = static_cast< long >( curr->second );
+		int peso = static_cast< int >( curr->second );
 		LexicoData newData;
 		newData.id = nextId;
 		newData.termino = word;

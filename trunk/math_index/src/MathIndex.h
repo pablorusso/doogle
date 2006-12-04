@@ -8,7 +8,7 @@ class MathIndex
 {
 	public:
 		static double norm( LexicalPair &items );
-		static double norm( LexicalPair &items, long &cantTerminos );
+		static double norm( LexicalPair &items, int &cantTerminos );
 		static double cosineRank( LexicalPair &items1, LexicalPair &items2, double norm1, double norm2 );
 };
 
